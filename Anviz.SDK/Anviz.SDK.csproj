@@ -45,6 +45,7 @@
     <Compile Include="Record.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="Statistic.cs" />
+    <Compile Include="TcpParameters.cs" />
     <Compile Include="UserInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

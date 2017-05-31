@@ -11,9 +11,12 @@ namespace Anviz.SDK
     {
         private const byte ACK_SUCCESS = 0x00;
         private const byte ACK_FAIL = 0x01;
-        private const byte RECORD_INFO = 0x3C;
-        private const byte ALL_RECORDS = 0x40;
-        private const byte STAFF_DATA = 0x72;
+        private const byte GET_RECORD_INFO = 0x3C;
+        private const byte GET_ALL_RECORDS = 0x40;
+        private const byte GET_DEVICE_SN = 0x46;
+        private const byte GET_DEVICE_TYPE = 0x48;
+        private const byte GET_STAFF_DATA = 0x72;
+        private const byte GET_TCP_PARAMETERS = 0x3A;
         
         private ushort[] CRCTABLE = new ushort[]{
              0x0000,0x1189,0x2312,0x329B,0x4624,0x57AD,0x6536,0x74BF,0x8C48,0x9DC1,
@@ -126,7 +129,7 @@ namespace Anviz.SDK
         }
         public Statistic GetDownloadInformation()
         {
-            byte[] response = SendCommand(RECORD_INFO, deviceId, new byte[] { }, 0);
+            byte[] response = SendCommand(GET_RECORD_INFO, deviceId, new byte[] { }, 0);
             Response parsed = GenerateResponse(response);
             Statistic deviceStatistic = new Statistic();
             deviceStatistic.UserAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 0, 3));
@@ -148,7 +151,7 @@ namespace Anviz.SDK
 
                 byte package = (byte)(isFirst ? 1 : 0);
                 byte[] data = new byte[] { package, 12 };
-                byte[] response = SendCommand(ALL_RECORDS, deviceId, data, 2);                
+                byte[] response = SendCommand(GET_ALL_RECORDS, deviceId, data, 2);                
                 Response values = GenerateResponse(response);
                 if (values.RET == ACK_SUCCESS)
                 {
@@ -179,7 +182,7 @@ namespace Anviz.SDK
             {
                 byte package = (byte)(isFirst ? 1 : 0);
                 byte[] data = new byte[] { package, 12 };
-                byte[] response = SendCommand(STAFF_DATA, deviceId, data, 2);
+                byte[] response = SendCommand(GET_STAFF_DATA, deviceId, data, 2);
                 Response values = GenerateResponse(response);
                 if (values.RET == ACK_SUCCESS)
                 {
@@ -198,6 +201,49 @@ namespace Anviz.SDK
                 isFirst = false;
             }
             return users;
+        }
+
+        public TcpParameters GetTcpParameters()
+        {
+            byte[] response = SendCommand(GET_TCP_PARAMETERS, deviceId, new byte[] { }, 0);
+            Response parsed = GenerateResponse(response);
+            if (parsed.RET == ACK_SUCCESS)
+            {
+                TcpParameters parameters = new TcpParameters();
+                parameters.IP = string.Join(".", SplitBytes(parsed.DATA, 0, 4));
+                parameters.SubnetMask = string.Join(".", SplitBytes(parsed.DATA, 4, 4));
+                parameters.MacAddress = string.Join("-", SplitBytes(parsed.DATA, 8, 6));
+                parameters.DefaultGateway = string.Join(".", SplitBytes(parsed.DATA, 14, 4));
+                parameters.Server = string.Join(".", SplitBytes(parsed.DATA, 18, 4));
+                parameters.FarLimit = parsed.DATA[23];
+                parameters.ComPort = (int)ReadBytes(SplitBytes(parsed.DATA, 23, 2));
+                parameters.TcpMode = parsed.DATA[26] == 0 ? "Server Mode" : "Client Mode";
+                parameters.DhcpLimit = parsed.DATA[27];
+                return parameters;
+            }
+            return null;
+        }
+
+        public ulong GetDeviceSN()
+        {
+            byte[] response = SendCommand(GET_DEVICE_SN, deviceId, new byte[] { }, 0);
+            Response parsed = GenerateResponse(response);
+            if (parsed.RET == ACK_SUCCESS)
+            {
+                return ReadBytes(SplitBytes(parsed.DATA, 0, 4));
+            }
+            return 0;
+        }
+
+        public string GetDeviceTypeCode()
+        {
+            byte[] response = SendCommand(GET_DEVICE_TYPE, deviceId, new byte[] { }, 0);
+            Response parsed = GenerateResponse(response);
+            if (parsed.RET == ACK_SUCCESS)
+            {
+                return Encoding.UTF8.GetString(SplitBytes(parsed.DATA, 0, 8)).Replace("\0", "");
+            }
+            return string.Empty;
         }
     }
 }
