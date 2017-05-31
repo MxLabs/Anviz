@@ -8,3 +8,6 @@ Features
  - Device Statistics
  - Download All Records
  - Get All Users
+ - Get TCP/IP Parameters
+ - Get Device SN
+ - Get Device Type Code
