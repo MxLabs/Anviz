@@ -9,9 +9,9 @@ namespace Anviz.SDK
         List<UserInfo> employees = null;
         Statistic stats = null;
 
-        public AnvizMonitor(string host, ulong deviceId, int port = 5010)
+        public AnvizMonitor(string host, ulong deviceId, int port = 5010, int timeout = 3)
         {
-            anvizManager = new AnvizManager(host, deviceId, port, 1);   //used 1 seconds timeout
+            anvizManager = new AnvizManager(host, deviceId, port, timeout);
             anvizManager.Connect();
             InitializeEmployees();
         }

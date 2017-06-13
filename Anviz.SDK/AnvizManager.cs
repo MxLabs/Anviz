@@ -20,8 +20,6 @@ namespace Anviz.SDK
         private const byte GET_TCP_PARAMETERS = 0x3A;
         private const byte CLEAR_NEW_RECORDS = 0x4E;
 
-        private const byte RESPONSE_TIMEOUT = 3;   //seconds
-
         private ushort[] CRCTABLE = new ushort[]{
             0x0000,0x1189,0x2312,0x329B,0x4624,0x57AD,0x6536,0x74BF,0x8C48,0x9DC1,
             0xAF5A,0xBED3,0xCA6C,0xDBE5,0xE97E,0xF8F7,0x1081,0x0108,0x3393,0x221A,
@@ -56,7 +54,7 @@ namespace Anviz.SDK
         private int port;
         private int timeout;
 
-        public AnvizManager(string host, ulong deviceId, int port = 5010, int timeout = RESPONSE_TIMEOUT)
+        public AnvizManager(string host, ulong deviceId, int port = 5010, int timeout = 3)
         {
             this.deviceId = deviceId;
             this.host = host;
