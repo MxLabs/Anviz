@@ -7,7 +7,7 @@
         public uint PasswordAmount { get; set; }
         public uint CardAmount { get; set; }
         public uint AllRecordAmount { get; set; }
-        public uint NewRecordAmount { get; set; }
+        public int NewRecordAmount { get; set; }
         public Statistic()
         {
 
