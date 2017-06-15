@@ -143,6 +143,10 @@ namespace Anviz.SDK
             }
             catch (SocketException e)
             {
+                if (e.ErrorCode == 10057||e.ErrorCode==10054)
+                {
+                    Thread.Sleep(1000);
+                }
                 Console.WriteLine(string.Format("{0} Error code: {1}", e.Message, e.ErrorCode));
                 return null;
             }
