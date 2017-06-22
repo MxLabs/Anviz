@@ -11,3 +11,4 @@ Features
  - Get TCP/IP Parameters
  - Get Device SN
  - Get Device Type Code
+ - Clear new records sign 
