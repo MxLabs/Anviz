@@ -17,7 +17,8 @@ namespace Anviz.SDK
         private const byte GET_DEVICE_TYPE = 0x48;
         private const byte GET_STAFF_DATA = 0x72;
         private const byte GET_TCP_PARAMETERS = 0x3A;
-        
+        private const byte CLEAR_NEW_RECORDS = 0x4E;
+
         private ushort[] CRCTABLE = new ushort[]{
              0x0000,0x1189,0x2312,0x329B,0x4624,0x57AD,0x6536,0x74BF,0x8C48,0x9DC1,
              0xAF5A,0xBED3,0xCA6C,0xDBE5,0xE97E,0xF8F7,0x1081,0x0108,0x3393,0x221A,
@@ -130,14 +131,18 @@ namespace Anviz.SDK
         public Statistic GetDownloadInformation()
         {
             byte[] response = SendCommand(GET_RECORD_INFO, deviceId, new byte[] { }, 0);
-            Response parsed = GenerateResponse(response);
-            Statistic deviceStatistic = new Statistic();
-            deviceStatistic.UserAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 0, 3));
-            deviceStatistic.FingerPrintAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 3, 3));
-            deviceStatistic.PasswordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 6, 3));
-            deviceStatistic.CardAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 9, 3));
-            deviceStatistic.AllRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 12, 3));
-            deviceStatistic.NewRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 15, 3));
+            Statistic deviceStatistic = null;
+            if (response != null)
+            {
+                Response parsed = GenerateResponse(response);
+                deviceStatistic = new Statistic();
+                deviceStatistic.UserAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 0, 3));
+                deviceStatistic.FingerPrintAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 3, 3));
+                deviceStatistic.PasswordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 6, 3));
+                deviceStatistic.CardAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 9, 3));
+                deviceStatistic.AllRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 12, 3));
+                deviceStatistic.NewRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 15, 3));
+            }
             return deviceStatistic;
         }
 
@@ -151,7 +156,11 @@ namespace Anviz.SDK
 
                 byte package = (byte)(isFirst ? 1 : 0);
                 byte[] data = new byte[] { package, 12 };
-                byte[] response = SendCommand(GET_ALL_RECORDS, deviceId, data, 2);                
+                byte[] response = SendCommand(GET_ALL_RECORDS, deviceId, data, 2);
+                if (response == null)
+                {
+                    return null;
+                }
                 Response values = GenerateResponse(response);
                 if (values.RET == ACK_SUCCESS)
                 {
@@ -183,6 +192,10 @@ namespace Anviz.SDK
                 byte package = (byte)(isFirst ? 1 : 0);
                 byte[] data = new byte[] { package, 12 };
                 byte[] response = SendCommand(GET_STAFF_DATA, deviceId, data, 2);
+                if (response == null)
+                {
+                    return null;
+                }
                 Response values = GenerateResponse(response);
                 if (values.RET == ACK_SUCCESS)
                 {
@@ -206,20 +219,23 @@ namespace Anviz.SDK
         public TcpParameters GetTcpParameters()
         {
             byte[] response = SendCommand(GET_TCP_PARAMETERS, deviceId, new byte[] { }, 0);
-            Response parsed = GenerateResponse(response);
-            if (parsed.RET == ACK_SUCCESS)
+            if (response != null)
             {
-                TcpParameters parameters = new TcpParameters();
-                parameters.IP = string.Join(".", SplitBytes(parsed.DATA, 0, 4));
-                parameters.SubnetMask = string.Join(".", SplitBytes(parsed.DATA, 4, 4));
-                parameters.MacAddress = string.Join("-", SplitBytes(parsed.DATA, 8, 6));
-                parameters.DefaultGateway = string.Join(".", SplitBytes(parsed.DATA, 14, 4));
-                parameters.Server = string.Join(".", SplitBytes(parsed.DATA, 18, 4));
-                parameters.FarLimit = parsed.DATA[23];
-                parameters.ComPort = (int)ReadBytes(SplitBytes(parsed.DATA, 23, 2));
-                parameters.TcpMode = parsed.DATA[26] == 0 ? "Server Mode" : "Client Mode";
-                parameters.DhcpLimit = parsed.DATA[27];
-                return parameters;
+                Response parsed = GenerateResponse(response);
+                if (parsed.RET == ACK_SUCCESS)
+                {
+                    TcpParameters parameters = new TcpParameters();
+                    parameters.IP = string.Join(".", SplitBytes(parsed.DATA, 0, 4));
+                    parameters.SubnetMask = string.Join(".", SplitBytes(parsed.DATA, 4, 4));
+                    parameters.MacAddress = string.Join("-", SplitBytes(parsed.DATA, 8, 6));
+                    parameters.DefaultGateway = string.Join(".", SplitBytes(parsed.DATA, 14, 4));
+                    parameters.Server = string.Join(".", SplitBytes(parsed.DATA, 18, 4));
+                    parameters.FarLimit = parsed.DATA[23];
+                    parameters.ComPort = (int)ReadBytes(SplitBytes(parsed.DATA, 23, 2));
+                    parameters.TcpMode = parsed.DATA[26] == 0 ? "Server Mode" : "Client Mode";
+                    parameters.DhcpLimit = parsed.DATA[27];
+                    return parameters;
+                }
             }
             return null;
         }
@@ -227,10 +243,13 @@ namespace Anviz.SDK
         public ulong GetDeviceSN()
         {
             byte[] response = SendCommand(GET_DEVICE_SN, deviceId, new byte[] { }, 0);
-            Response parsed = GenerateResponse(response);
-            if (parsed.RET == ACK_SUCCESS)
+            if (response != null)
             {
-                return ReadBytes(SplitBytes(parsed.DATA, 0, 4));
+                Response parsed = GenerateResponse(response);
+                if (parsed.RET == ACK_SUCCESS)
+                {
+                    return ReadBytes(SplitBytes(parsed.DATA, 0, 4));
+                }
             }
             return 0;
         }
@@ -238,12 +257,30 @@ namespace Anviz.SDK
         public string GetDeviceTypeCode()
         {
             byte[] response = SendCommand(GET_DEVICE_TYPE, deviceId, new byte[] { }, 0);
-            Response parsed = GenerateResponse(response);
-            if (parsed.RET == ACK_SUCCESS)
+            if (response != null)
             {
-                return Encoding.UTF8.GetString(SplitBytes(parsed.DATA, 0, 8)).Replace("\0", "");
+                Response parsed = GenerateResponse(response);
+                if (parsed.RET == ACK_SUCCESS)
+                {
+                    return Encoding.UTF8.GetString(SplitBytes(parsed.DATA, 0, 8)).Replace("\0", "");
+                }
             }
             return string.Empty;
+        }
+
+        public bool ClearNewRecords()
+        {
+            byte[] data = new byte[] { 1 };
+            byte[] response = SendCommand(CLEAR_NEW_RECORDS, deviceId, data, 4);
+            if (response != null)
+            {
+                Response parsed = GenerateResponse(response);
+                if (parsed.RET == ACK_SUCCESS)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
