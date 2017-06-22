@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 namespace Anviz.SDK
 {
-    public class AnvizManager
+    public class AnvizManager : IDisposable
     {
         private const byte ACK_SUCCESS = 0x00;
         private const byte ACK_FAIL = 0x01;
@@ -244,6 +244,11 @@ namespace Anviz.SDK
                 return Encoding.UTF8.GetString(SplitBytes(parsed.DATA, 0, 8)).Replace("\0", "");
             }
             return string.Empty;
+        }
+
+        public void Dispose()
+        {
+            socket.Dispose();
         }
     }
 }
