@@ -130,14 +130,18 @@ namespace Anviz.SDK
         public Statistic GetDownloadInformation()
         {
             byte[] response = SendCommand(GET_RECORD_INFO, deviceId, new byte[] { }, 0);
-            Response parsed = GenerateResponse(response);
-            Statistic deviceStatistic = new Statistic();
-            deviceStatistic.UserAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 0, 3));
-            deviceStatistic.FingerPrintAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 3, 3));
-            deviceStatistic.PasswordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 6, 3));
-            deviceStatistic.CardAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 9, 3));
-            deviceStatistic.AllRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 12, 3));
-            deviceStatistic.NewRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 15, 3));
+            Statistic deviceStatistic = null;
+            if (response != null)
+            {
+                Response parsed = GenerateResponse(response);
+                deviceStatistic = new Statistic();
+                deviceStatistic.UserAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 0, 3));
+                deviceStatistic.FingerPrintAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 3, 3));
+                deviceStatistic.PasswordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 6, 3));
+                deviceStatistic.CardAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 9, 3));
+                deviceStatistic.AllRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 12, 3));
+                deviceStatistic.NewRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 15, 3));
+            }
             return deviceStatistic;
         }
 
