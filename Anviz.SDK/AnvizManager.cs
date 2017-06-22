@@ -219,20 +219,23 @@ namespace Anviz.SDK
         public TcpParameters GetTcpParameters()
         {
             byte[] response = SendCommand(GET_TCP_PARAMETERS, deviceId, new byte[] { }, 0);
-            Response parsed = GenerateResponse(response);
-            if (parsed.RET == ACK_SUCCESS)
+            if (response != null)
             {
-                TcpParameters parameters = new TcpParameters();
-                parameters.IP = string.Join(".", SplitBytes(parsed.DATA, 0, 4));
-                parameters.SubnetMask = string.Join(".", SplitBytes(parsed.DATA, 4, 4));
-                parameters.MacAddress = string.Join("-", SplitBytes(parsed.DATA, 8, 6));
-                parameters.DefaultGateway = string.Join(".", SplitBytes(parsed.DATA, 14, 4));
-                parameters.Server = string.Join(".", SplitBytes(parsed.DATA, 18, 4));
-                parameters.FarLimit = parsed.DATA[23];
-                parameters.ComPort = (int)ReadBytes(SplitBytes(parsed.DATA, 23, 2));
-                parameters.TcpMode = parsed.DATA[26] == 0 ? "Server Mode" : "Client Mode";
-                parameters.DhcpLimit = parsed.DATA[27];
-                return parameters;
+                Response parsed = GenerateResponse(response);
+                if (parsed.RET == ACK_SUCCESS)
+                {
+                    TcpParameters parameters = new TcpParameters();
+                    parameters.IP = string.Join(".", SplitBytes(parsed.DATA, 0, 4));
+                    parameters.SubnetMask = string.Join(".", SplitBytes(parsed.DATA, 4, 4));
+                    parameters.MacAddress = string.Join("-", SplitBytes(parsed.DATA, 8, 6));
+                    parameters.DefaultGateway = string.Join(".", SplitBytes(parsed.DATA, 14, 4));
+                    parameters.Server = string.Join(".", SplitBytes(parsed.DATA, 18, 4));
+                    parameters.FarLimit = parsed.DATA[23];
+                    parameters.ComPort = (int)ReadBytes(SplitBytes(parsed.DATA, 23, 2));
+                    parameters.TcpMode = parsed.DATA[26] == 0 ? "Server Mode" : "Client Mode";
+                    parameters.DhcpLimit = parsed.DATA[27];
+                    return parameters;
+                }
             }
             return null;
         }
