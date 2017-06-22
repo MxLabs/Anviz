@@ -155,7 +155,11 @@ namespace Anviz.SDK
 
                 byte package = (byte)(isFirst ? 1 : 0);
                 byte[] data = new byte[] { package, 12 };
-                byte[] response = SendCommand(GET_ALL_RECORDS, deviceId, data, 2);                
+                byte[] response = SendCommand(GET_ALL_RECORDS, deviceId, data, 2);
+                if (response == null)
+                {
+                    return null;
+                }
                 Response values = GenerateResponse(response);
                 if (values.RET == ACK_SUCCESS)
                 {
