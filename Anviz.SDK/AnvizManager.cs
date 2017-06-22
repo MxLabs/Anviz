@@ -256,10 +256,13 @@ namespace Anviz.SDK
         public string GetDeviceTypeCode()
         {
             byte[] response = SendCommand(GET_DEVICE_TYPE, deviceId, new byte[] { }, 0);
-            Response parsed = GenerateResponse(response);
-            if (parsed.RET == ACK_SUCCESS)
+            if (response != null)
             {
-                return Encoding.UTF8.GetString(SplitBytes(parsed.DATA, 0, 8)).Replace("\0", "");
+                Response parsed = GenerateResponse(response);
+                if (parsed.RET == ACK_SUCCESS)
+                {
+                    return Encoding.UTF8.GetString(SplitBytes(parsed.DATA, 0, 8)).Replace("\0", "");
+                }
             }
             return string.Empty;
         }
