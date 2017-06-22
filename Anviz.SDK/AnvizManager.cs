@@ -242,10 +242,13 @@ namespace Anviz.SDK
         public ulong GetDeviceSN()
         {
             byte[] response = SendCommand(GET_DEVICE_SN, deviceId, new byte[] { }, 0);
-            Response parsed = GenerateResponse(response);
-            if (parsed.RET == ACK_SUCCESS)
+            if (response != null)
             {
-                return ReadBytes(SplitBytes(parsed.DATA, 0, 4));
+                Response parsed = GenerateResponse(response);
+                if (parsed.RET == ACK_SUCCESS)
+                {
+                    return ReadBytes(SplitBytes(parsed.DATA, 0, 4));
+                }
             }
             return 0;
         }
