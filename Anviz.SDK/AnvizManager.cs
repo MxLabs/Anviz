@@ -49,11 +49,29 @@ namespace Anviz.SDK
         };
         private ulong deviceId = 0;
         private Socket socket = null;
+        private string host;
+        private int port;
         public AnvizManager(string host, ulong deviceId, int port = 5010)
         {
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            socket.Connect(new IPEndPoint(IPAddress.Parse(host), port));
+            this.host = host;
+            this.port = port;
             this.deviceId = deviceId;
+        }
+
+        public bool Connect()
+        {
+            try
+            {
+                if (socket != null) socket.Dispose();
+                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                socket.Connect(new IPEndPoint(IPAddress.Parse(host), port));
+                return true;
+            }
+            catch (SocketException e)
+            {
+                Console.WriteLine(string.Format("{0} Error code: {1}", e.Message, e.ErrorCode));
+            }
+            return false;
         }
 
         private ushort CRC16(byte[] data)
