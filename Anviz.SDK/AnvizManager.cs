@@ -17,7 +17,8 @@ namespace Anviz.SDK
         private const byte GET_DEVICE_TYPE = 0x48;
         private const byte GET_STAFF_DATA = 0x72;
         private const byte GET_TCP_PARAMETERS = 0x3A;
-        
+        private const byte CLEAR_NEW_RECORDS = 0x4E;
+
         private ushort[] CRCTABLE = new ushort[]{
              0x0000,0x1189,0x2312,0x329B,0x4624,0x57AD,0x6536,0x74BF,0x8C48,0x9DC1,
              0xAF5A,0xBED3,0xCA6C,0xDBE5,0xE97E,0xF8F7,0x1081,0x0108,0x3393,0x221A,
@@ -244,6 +245,21 @@ namespace Anviz.SDK
                 return Encoding.UTF8.GetString(SplitBytes(parsed.DATA, 0, 8)).Replace("\0", "");
             }
             return string.Empty;
+        }
+
+        public bool ClearNewRecords()
+        {
+            byte[] data = new byte[] { 1 };
+            byte[] response = SendCommand(CLEAR_NEW_RECORDS, deviceId, data, 4);
+            if (response != null)
+            {
+                Response parsed = GenerateResponse(response);
+                if (parsed.RET == ACK_SUCCESS)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
