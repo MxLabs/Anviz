@@ -289,7 +289,7 @@ namespace Anviz.SDK
         public bool ClearNewRecords()
         {
             byte[] data = new byte[] { 1 };
-            byte[] response = SendCommand(CLEAR_NEW_RECORDS, deviceId, data, 4);
+            byte[] response = SendCommand(CLEAR_NEW_RECORDS, deviceId, data, 1);
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
