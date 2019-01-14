@@ -209,7 +209,7 @@ namespace Anviz.SDK
             while (userAmount > 0)
             {
                 byte package = (byte)(isFirst ? 1 : 0);
-                byte[] data = new byte[] { package, 12 };
+                byte[] data = new byte[] { package, 8 };
                 byte[] response = SendCommand(GET_STAFF_DATA, deviceId, data);
                 if (response == null)
                 {
@@ -223,7 +223,7 @@ namespace Anviz.SDK
                     values.DATA = SplitBytes(values.DATA, 1, values.DATA.Length);
                     for (int i = 0; i < counter; i++)
                     {
-                        int pos = i * 30;
+                        int pos = i * 40;
                         UserInfo userInfo = new UserInfo();
                         userInfo.Id = ReadBytes(SplitBytes(values.DATA, pos, 5));
                         userInfo.Name = Encoding.BigEndianUnicode.GetString(SplitBytes(values.DATA, pos + 12, 10)).TrimEnd('\0');
