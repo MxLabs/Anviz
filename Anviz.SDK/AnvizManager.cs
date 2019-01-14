@@ -45,20 +45,6 @@ namespace Anviz.SDK
             }
             return false;
         }
-        private ulong ReadBytes(byte[] data)
-        {
-            ulong result = 0;
-            for (int i = 0; i < data.Length; i++)
-            {
-                ulong b = (ulong)(data[data.Length - 1 - i] % 256);
-                result += (ulong)(b << (byte)(i * 8));
-            }
-            return result;
-        }
-        private byte[] SplitBytes(byte[] data, int start, int count)
-        {
-            return data.Skip(start).Take(count).ToArray();
-        }
         private byte[] SendCommand(byte command, ulong deviceId, byte[] data)
         {
             ushort crc = 0x0000;
@@ -116,12 +102,12 @@ namespace Anviz.SDK
             {
                 Response parsed = GenerateResponse(response);
                 deviceStatistic = new Statistic();
-                deviceStatistic.UserAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 0, 3));
-                deviceStatistic.FingerPrintAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 3, 3));
-                deviceStatistic.PasswordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 6, 3));
-                deviceStatistic.CardAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 9, 3));
-                deviceStatistic.AllRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 12, 3));
-                deviceStatistic.NewRecordAmount = (uint)ReadBytes(SplitBytes(parsed.DATA, 15, 3));
+                deviceStatistic.UserAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 0, 3));
+                deviceStatistic.FingerPrintAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 3, 3));
+                deviceStatistic.PasswordAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 6, 3));
+                deviceStatistic.CardAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 9, 3));
+                deviceStatistic.AllRecordAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 12, 3));
+                deviceStatistic.NewRecordAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 15, 3));
             }
             return deviceStatistic;
         }
@@ -146,16 +132,16 @@ namespace Anviz.SDK
                 {
                     int counter = values.DATA.First();
                     recordAmount -= (uint)counter;
-                    values.DATA = SplitBytes(values.DATA, 1, values.DATA.Length);
+                    values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
                     for (int i = 0; i < counter; i++)
                     {
                         int pos = i * 14;
                         Record record = new Record();
-                        record.UserCode = ReadBytes(SplitBytes(values.DATA, pos, 5));
-                        record.DateTime = ReadBytes(SplitBytes(values.DATA, pos + 5, 4));
+                        record.UserCode = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
+                        record.DateTime = Bytes.Read(Bytes.Split(values.DATA, pos + 5, 4));
                         record.BackupCode = values.DATA[pos + 10];
                         record.RecordType = values.DATA[pos + 11];
-                        record.WorkType = (uint)ReadBytes(SplitBytes(values.DATA, pos + 12, 3));
+                        record.WorkType = (uint)Bytes.Read(Bytes.Split(values.DATA, pos + 12, 3));
                         records.Add(record);
                     }
                 }
@@ -181,13 +167,13 @@ namespace Anviz.SDK
                 {
                     int counter = values.DATA.First();
                     userAmount -= counter;
-                    values.DATA = SplitBytes(values.DATA, 1, values.DATA.Length);
+                    values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
                     for (int i = 0; i < counter; i++)
                     {
                         int pos = i * 40;
                         UserInfo userInfo = new UserInfo();
-                        userInfo.Id = ReadBytes(SplitBytes(values.DATA, pos, 5));
-                        userInfo.Name = Encoding.BigEndianUnicode.GetString(SplitBytes(values.DATA, pos + 12, 10)).TrimEnd('\0');
+                        userInfo.Id = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
+                        userInfo.Name = Encoding.BigEndianUnicode.GetString(Bytes.Split(values.DATA, pos + 12, 10)).TrimEnd('\0');
                         users.Add(userInfo);
                     }
                 }
@@ -205,13 +191,13 @@ namespace Anviz.SDK
                 if (parsed.RET == ACK_SUCCESS)
                 {
                     TcpParameters parameters = new TcpParameters();
-                    parameters.IP = string.Join(".", SplitBytes(parsed.DATA, 0, 4));
-                    parameters.SubnetMask = string.Join(".", SplitBytes(parsed.DATA, 4, 4));
-                    parameters.MacAddress = string.Join("-", SplitBytes(parsed.DATA, 8, 6));
-                    parameters.DefaultGateway = string.Join(".", SplitBytes(parsed.DATA, 14, 4));
-                    parameters.Server = string.Join(".", SplitBytes(parsed.DATA, 18, 4));
+                    parameters.IP = string.Join(".", Bytes.Split(parsed.DATA, 0, 4));
+                    parameters.SubnetMask = string.Join(".", Bytes.Split(parsed.DATA, 4, 4));
+                    parameters.MacAddress = string.Join("-", Bytes.Split(parsed.DATA, 8, 6));
+                    parameters.DefaultGateway = string.Join(".", Bytes.Split(parsed.DATA, 14, 4));
+                    parameters.Server = string.Join(".", Bytes.Split(parsed.DATA, 18, 4));
                     parameters.FarLimit = parsed.DATA[23];
-                    parameters.ComPort = (int)ReadBytes(SplitBytes(parsed.DATA, 23, 2));
+                    parameters.ComPort = (int)Bytes.Read(Bytes.Split(parsed.DATA, 23, 2));
                     parameters.TcpMode = parsed.DATA[25] == 0 ? "Server Mode" : "Client Mode";
                     parameters.DhcpLimit = parsed.DATA[26];
                     return parameters;
@@ -228,7 +214,7 @@ namespace Anviz.SDK
                 Response parsed = GenerateResponse(response);
                 if (parsed.RET == ACK_SUCCESS)
                 {
-                    return ReadBytes(SplitBytes(parsed.DATA, 0, 4));
+                    return Bytes.Read(Bytes.Split(parsed.DATA, 0, 4));
                 }
             }
             return 0;
@@ -242,7 +228,7 @@ namespace Anviz.SDK
                 Response parsed = GenerateResponse(response);
                 if (parsed.RET == ACK_SUCCESS)
                 {
-                    return Encoding.BigEndianUnicode.GetString(SplitBytes(parsed.DATA, 0, 8)).TrimEnd('\0');
+                    return Encoding.BigEndianUnicode.GetString(Bytes.Split(parsed.DATA, 0, 8)).TrimEnd('\0');
                 }
             }
             return string.Empty;
