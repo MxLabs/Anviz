@@ -226,7 +226,7 @@ namespace Anviz.SDK
                         int pos = i * 30;
                         UserInfo userInfo = new UserInfo();
                         userInfo.Id = ReadBytes(SplitBytes(values.DATA, pos, 5));
-                        userInfo.Name = Encoding.BigEndianUnicode.GetString(SplitBytes(values.DATA, pos + 12, 10));
+                        userInfo.Name = Encoding.BigEndianUnicode.GetString(SplitBytes(values.DATA, pos + 12, 10)).TrimEnd('\0');
                         users.Add(userInfo);
                     }
                 }
@@ -281,7 +281,7 @@ namespace Anviz.SDK
                 Response parsed = GenerateResponse(response);
                 if (parsed.RET == ACK_SUCCESS)
                 {
-                    return Encoding.BigEndianUnicode.GetString(SplitBytes(parsed.DATA, 0, 8));
+                    return Encoding.BigEndianUnicode.GetString(SplitBytes(parsed.DATA, 0, 8)).TrimEnd('\0');
                 }
             }
             return string.Empty;
