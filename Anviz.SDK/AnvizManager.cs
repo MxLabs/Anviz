@@ -98,10 +98,11 @@ namespace Anviz.SDK
         {
             return data.Skip(start).Take(count).ToArray();
         }
-        private byte[] SendCommand(byte command, ulong deviceId, byte[] data, ushort dataLength)
+        private byte[] SendCommand(byte command, ulong deviceId, byte[] data)
         {
             ushort crc = 0x0000;
-            byte[] commandBytes = new byte[8 + data.Length];
+            ushort dataLength = (ushort)data.Length;
+            byte[] commandBytes = new byte[8 + dataLength];
             commandBytes[0] = 0xA5;
             commandBytes[1] = (byte)((deviceId >> 24) % 256);
             commandBytes[2] = (byte)((deviceId >> 16) % 256);
@@ -110,15 +111,15 @@ namespace Anviz.SDK
             commandBytes[5] = command;
             commandBytes[6] = (byte)(dataLength >> 8);
             commandBytes[7] = (byte)(dataLength % 256);
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < dataLength; i++)
             {
                 commandBytes[i + 8] = data[i];
             }
             crc = CRC16(commandBytes);
             byte[] payload = new byte[commandBytes.Length + 2];
             Array.Copy(commandBytes, payload, commandBytes.Length);
-            payload[9 + data.Length] = (byte)((crc >> 8) % 256);
-            payload[8 + data.Length] = (byte)(crc % 256);
+            payload[9 + dataLength] = (byte)((crc >> 8) % 256);
+            payload[8 + dataLength] = (byte)(crc % 256);
             socket.Send(payload);
             Thread.Sleep(400);
             if (socket.Available > 0)
@@ -148,7 +149,7 @@ namespace Anviz.SDK
         }
         public Statistic GetDownloadInformation()
         {
-            byte[] response = SendCommand(GET_RECORD_INFO, deviceId, new byte[] { }, 0);
+            byte[] response = SendCommand(GET_RECORD_INFO, deviceId, new byte[] { });
             Statistic deviceStatistic = null;
             if (response != null)
             {
@@ -174,7 +175,7 @@ namespace Anviz.SDK
 
                 byte package = (byte)(isFirst ? 1 : 0);
                 byte[] data = new byte[] { package, 12 };
-                byte[] response = SendCommand(GET_ALL_RECORDS, deviceId, data, 2);
+                byte[] response = SendCommand(GET_ALL_RECORDS, deviceId, data);
                 if (response == null)
                 {
                     return null;
@@ -209,7 +210,7 @@ namespace Anviz.SDK
             {
                 byte package = (byte)(isFirst ? 1 : 0);
                 byte[] data = new byte[] { package, 12 };
-                byte[] response = SendCommand(GET_STAFF_DATA, deviceId, data, 2);
+                byte[] response = SendCommand(GET_STAFF_DATA, deviceId, data);
                 if (response == null)
                 {
                     return null;
@@ -236,7 +237,7 @@ namespace Anviz.SDK
 
         public TcpParameters GetTcpParameters()
         {
-            byte[] response = SendCommand(GET_TCP_PARAMETERS, deviceId, new byte[] { }, 0);
+            byte[] response = SendCommand(GET_TCP_PARAMETERS, deviceId, new byte[] { });
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
@@ -260,7 +261,7 @@ namespace Anviz.SDK
 
         public ulong GetDeviceSN()
         {
-            byte[] response = SendCommand(GET_DEVICE_SN, deviceId, new byte[] { }, 0);
+            byte[] response = SendCommand(GET_DEVICE_SN, deviceId, new byte[] { });
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
@@ -274,7 +275,7 @@ namespace Anviz.SDK
 
         public string GetDeviceTypeCode()
         {
-            byte[] response = SendCommand(GET_DEVICE_TYPE, deviceId, new byte[] { }, 0);
+            byte[] response = SendCommand(GET_DEVICE_TYPE, deviceId, new byte[] { });
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
@@ -289,7 +290,7 @@ namespace Anviz.SDK
         public bool ClearNewRecords()
         {
             byte[] data = new byte[] { 1 };
-            byte[] response = SendCommand(CLEAR_NEW_RECORDS, deviceId, data, 4);
+            byte[] response = SendCommand(CLEAR_NEW_RECORDS, deviceId, data);
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
