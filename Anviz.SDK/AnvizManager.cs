@@ -1,4 +1,5 @@
-﻿using Anviz.SDK.Utils;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,6 @@ namespace Anviz.SDK
     {
         private const byte ACK_SUCCESS = 0x00;
         private const byte ACK_FAIL = 0x01;
-        private const byte GET_RECORD_INFO = 0x3C;
-        private const byte GET_ALL_RECORDS = 0x40;
-        private const byte GET_DEVICE_SN = 0x46;
-        private const byte GET_DEVICE_TYPE = 0x48;
-        private const byte GET_STAFF_DATA = 0x72;
-        private const byte GET_TCP_PARAMETERS = 0x3A;
-        private const byte CLEAR_NEW_RECORDS = 0x4E;
         private ulong deviceId = 0;
         private Socket socket = null;
         private string host;
@@ -45,29 +39,9 @@ namespace Anviz.SDK
             }
             return false;
         }
-        private byte[] SendCommand(byte command, ulong deviceId, byte[] data)
+        private byte[] SendCommand(Command cmd)
         {
-            ushort crc = 0x0000;
-            ushort dataLength = (ushort)data.Length;
-            byte[] commandBytes = new byte[8 + dataLength];
-            commandBytes[0] = 0xA5;
-            commandBytes[1] = (byte)((deviceId >> 24) % 256);
-            commandBytes[2] = (byte)((deviceId >> 16) % 256);
-            commandBytes[3] = (byte)((deviceId >> 8) % 256);
-            commandBytes[4] = (byte)(deviceId % 256);
-            commandBytes[5] = command;
-            commandBytes[6] = (byte)(dataLength >> 8);
-            commandBytes[7] = (byte)(dataLength % 256);
-            for (int i = 0; i < dataLength; i++)
-            {
-                commandBytes[i + 8] = data[i];
-            }
-            crc = CRC16.Compute(commandBytes);
-            byte[] payload = new byte[commandBytes.Length + 2];
-            Array.Copy(commandBytes, payload, commandBytes.Length);
-            payload[9 + dataLength] = (byte)((crc >> 8) % 256);
-            payload[8 + dataLength] = (byte)(crc % 256);
-            socket.Send(payload);
+            socket.Send(cmd.payload);
             Thread.Sleep(400);
             if (socket.Available > 0)
             {
@@ -96,7 +70,7 @@ namespace Anviz.SDK
         }
         public Statistic GetDownloadInformation()
         {
-            byte[] response = SendCommand(GET_RECORD_INFO, deviceId, new byte[] { });
+            byte[] response = SendCommand(new GetRecordInfoCommand(deviceId));
             Statistic deviceStatistic = null;
             if (response != null)
             {
@@ -119,10 +93,7 @@ namespace Anviz.SDK
             DateTime defaultDate = new DateTime(2000, 01, 02, 0, 0, 0);
             while (recordAmount > 0)
             {
-
-                byte package = (byte)(isFirst ? 1 : 0);
-                byte[] data = new byte[] { package, 12 };
-                byte[] response = SendCommand(GET_ALL_RECORDS, deviceId, data);
+                byte[] response = SendCommand(new GetRecordsCommand(deviceId, isFirst, recordAmount));
                 if (response == null)
                 {
                     return null;
@@ -149,15 +120,13 @@ namespace Anviz.SDK
             }
             return records;
         }
-        public List<UserInfo> GetEmployeesData(int userAmount)
+        public List<UserInfo> GetEmployeesData(uint userAmount)
         {
             List<UserInfo> users = new List<UserInfo>();
             bool isFirst = true;
             while (userAmount > 0)
             {
-                byte package = (byte)(isFirst ? 1 : 0);
-                byte[] data = new byte[] { package, 8 };
-                byte[] response = SendCommand(GET_STAFF_DATA, deviceId, data);
+                byte[] response = SendCommand(new GetStaffDataCommand(deviceId, isFirst, userAmount));
                 if (response == null)
                 {
                     return null;
@@ -165,7 +134,7 @@ namespace Anviz.SDK
                 Response values = GenerateResponse(response);
                 if (values.RET == ACK_SUCCESS)
                 {
-                    int counter = values.DATA.First();
+                    uint counter = values.DATA.First();
                     userAmount -= counter;
                     values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
                     for (int i = 0; i < counter; i++)
@@ -184,7 +153,7 @@ namespace Anviz.SDK
 
         public TcpParameters GetTcpParameters()
         {
-            byte[] response = SendCommand(GET_TCP_PARAMETERS, deviceId, new byte[] { });
+            byte[] response = SendCommand(new GetTCPParametersCommand(deviceId));
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
@@ -208,7 +177,7 @@ namespace Anviz.SDK
 
         public ulong GetDeviceSN()
         {
-            byte[] response = SendCommand(GET_DEVICE_SN, deviceId, new byte[] { });
+            byte[] response = SendCommand(new GetDeviceSNCommand(deviceId));
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
@@ -222,7 +191,7 @@ namespace Anviz.SDK
 
         public string GetDeviceTypeCode()
         {
-            byte[] response = SendCommand(GET_DEVICE_TYPE, deviceId, new byte[] { });
+            byte[] response = SendCommand(new GetDeviceTypeCommand(deviceId));
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
@@ -236,8 +205,7 @@ namespace Anviz.SDK
 
         public bool ClearNewRecords()
         {
-            byte[] data = new byte[] { 1 };
-            byte[] response = SendCommand(CLEAR_NEW_RECORDS, deviceId, data);
+            byte[] response = SendCommand(new ClearNewRecordsCommand(deviceId));
             if (response != null)
             {
                 Response parsed = GenerateResponse(response);
