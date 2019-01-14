@@ -251,8 +251,8 @@ namespace Anviz.SDK
                     parameters.Server = string.Join(".", SplitBytes(parsed.DATA, 18, 4));
                     parameters.FarLimit = parsed.DATA[23];
                     parameters.ComPort = (int)ReadBytes(SplitBytes(parsed.DATA, 23, 2));
-                    parameters.TcpMode = parsed.DATA[26] == 0 ? "Server Mode" : "Client Mode";
-                    parameters.DhcpLimit = parsed.DATA[27];
+                    parameters.TcpMode = parsed.DATA[25] == 0 ? "Server Mode" : "Client Mode";
+                    parameters.DhcpLimit = parsed.DATA[26];
                     return parameters;
                 }
             }
