@@ -1,10 +1,11 @@
 ﻿using Anviz.SDK.Utils;
+using System.Net.Sockets;
 
 namespace Anviz.SDK.Commands
 {
     abstract class Command
     {
-        public byte[] payload { get; private set; }
+        protected byte[] payload { get; private set; }
 
         protected ulong deviceId { get; }
 
@@ -32,6 +33,11 @@ namespace Anviz.SDK.Commands
             commandBytes.CopyTo(payload, 0);
             payload[9 + dataLength] = (byte)((crc >> 8) % 256);
             payload[8 + dataLength] = (byte)(crc % 256);
+        }
+
+        public void Send(NetworkStream stream)
+        {
+            stream.Write(payload, 0, payload.Length);
         }
     }
 }
