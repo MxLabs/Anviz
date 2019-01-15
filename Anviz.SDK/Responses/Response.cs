@@ -1,4 +1,5 @@
 ﻿using Anviz.SDK.Utils;
+using System;
 using System.Net.Sockets;
 
 namespace Anviz.SDK.Responses
@@ -15,10 +16,6 @@ namespace Anviz.SDK.Responses
         public byte[] LEN { get; }
         public byte[] DATA { get; set; }
         public byte[] CRC { get; }
-
-        public bool IsValid {
-            get => RET == RET_SUCCESS;
-        }
 
         public Response(NetworkStream stream)
         {
@@ -39,6 +36,11 @@ namespace Anviz.SDK.Responses
             LEN = Bytes.Split(data, 7, 2);
             DATA = Bytes.Split(data, 9, data.Length - 2);
             CRC = Bytes.Split(data, data.Length - 2, 2);
+
+            if(RET != RET_SUCCESS)
+            {
+                throw new Exception("Invalid response");
+            }
         }
     }
 }

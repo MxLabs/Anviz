@@ -43,22 +43,19 @@ namespace Anviz.SDK
                 var cmd = new GetRecordsCommand(deviceId, isFirst, recordAmount);
                 cmd.Send(stream);
                 var values = new Response(stream);
-                if (values.IsValid)
+                int counter = values.DATA.First();
+                recordAmount -= (uint)counter;
+                values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
+                for (int i = 0; i < counter; i++)
                 {
-                    int counter = values.DATA.First();
-                    recordAmount -= (uint)counter;
-                    values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
-                    for (int i = 0; i < counter; i++)
-                    {
-                        int pos = i * 14;
-                        Record record = new Record();
-                        record.UserCode = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
-                        record.DateTime = Bytes.Read(Bytes.Split(values.DATA, pos + 5, 4));
-                        record.BackupCode = values.DATA[pos + 10];
-                        record.RecordType = values.DATA[pos + 11];
-                        record.WorkType = (uint)Bytes.Read(Bytes.Split(values.DATA, pos + 12, 3));
-                        records.Add(record);
-                    }
+                    int pos = i * 14;
+                    Record record = new Record();
+                    record.UserCode = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
+                    record.DateTime = Bytes.Read(Bytes.Split(values.DATA, pos + 5, 4));
+                    record.BackupCode = values.DATA[pos + 10];
+                    record.RecordType = values.DATA[pos + 11];
+                    record.WorkType = (uint)Bytes.Read(Bytes.Split(values.DATA, pos + 12, 3));
+                    records.Add(record);
                 }
                 isFirst = false;
             }
@@ -73,19 +70,16 @@ namespace Anviz.SDK
                 var cmd = new GetStaffDataCommand(deviceId, isFirst, userAmount);
                 cmd.Send(stream);
                 var values = new Response(stream);
-                if (values.IsValid)
+                uint counter = values.DATA.First();
+                userAmount -= counter;
+                values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
+                for (int i = 0; i < counter; i++)
                 {
-                    uint counter = values.DATA.First();
-                    userAmount -= counter;
-                    values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
-                    for (int i = 0; i < counter; i++)
-                    {
-                        int pos = i * 40;
-                        UserInfo userInfo = new UserInfo();
-                        userInfo.Id = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
-                        userInfo.Name = Bytes.GetUnicodeString(Bytes.Split(values.DATA, pos + 12, 10));
-                        users.Add(userInfo);
-                    }
+                    int pos = i * 40;
+                    UserInfo userInfo = new UserInfo();
+                    userInfo.Id = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
+                    userInfo.Name = Bytes.GetUnicodeString(Bytes.Split(values.DATA, pos + 12, 10));
+                    users.Add(userInfo);
                 }
                 isFirst = false;
             }
@@ -104,11 +98,7 @@ namespace Anviz.SDK
             var cmd = new GetDeviceSNCommand(deviceId);
             cmd.Send(stream);
             var response = new Response(stream);
-            if (response.IsValid)
-            {
-                return Bytes.Read(response.DATA);
-            }
-            return 0;
+            return Bytes.Read(response.DATA);
         }
 
         public string GetDeviceTypeCode()
@@ -116,19 +106,14 @@ namespace Anviz.SDK
             var cmd = new GetDeviceTypeCommand(deviceId);
             cmd.Send(stream);
             var response = new Response(stream);
-            if (response.IsValid)
-            {
-                return Bytes.GetAsciiString(response.DATA);
-            }
-            return string.Empty;
+            return Bytes.GetAsciiString(response.DATA);
         }
 
-        public bool ClearNewRecords()
+        public void ClearNewRecords()
         {
             var cmd = new ClearNewRecordsCommand(deviceId);
             cmd.Send(stream);
-            var response = new Response(stream);
-            return response.IsValid;
+            var response = new Response(stream); //ensure correct response
         }
     }
 }
