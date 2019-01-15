@@ -118,10 +118,10 @@ namespace Anviz.SDK
         {
             var cmd = new GetDeviceSNCommand(deviceId);
             cmd.Send(stream);
-            var parsed = new Response(stream);
-            if (parsed.IsValid)
+            var response = new Response(stream);
+            if (response.IsValid)
             {
-                return Bytes.Read(Bytes.Split(parsed.DATA, 0, 4));
+                return Bytes.Read(response.DATA);
             }
             return 0;
         }
