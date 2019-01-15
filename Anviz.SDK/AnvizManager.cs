@@ -11,9 +11,6 @@ namespace Anviz.SDK
     {
         private readonly ulong deviceId;
 
-        private const byte ACK_SUCCESS = 0x00;
-        private const byte ACK_FAIL = 0x01;
-
         private TcpClient socket;
         private NetworkStream stream;
 
@@ -54,7 +51,7 @@ namespace Anviz.SDK
                 var cmd = new GetRecordsCommand(deviceId, isFirst, recordAmount);
                 cmd.Send(stream);
                 var values = new Response(stream);
-                if (values.RET == ACK_SUCCESS)
+                if (values.IsValid)
                 {
                     int counter = values.DATA.First();
                     recordAmount -= (uint)counter;
@@ -84,7 +81,7 @@ namespace Anviz.SDK
                 var cmd = new GetStaffDataCommand(deviceId, isFirst, userAmount);
                 cmd.Send(stream);
                 var values = new Response(stream);
-                if (values.RET == ACK_SUCCESS)
+                if (values.IsValid)
                 {
                     uint counter = values.DATA.First();
                     userAmount -= counter;
@@ -108,7 +105,7 @@ namespace Anviz.SDK
             var cmd = new GetTCPParametersCommand(deviceId);
             cmd.Send(stream);
             var parsed = new Response(stream);
-            if (parsed.RET == ACK_SUCCESS)
+            if (parsed.IsValid)
             {
                 var parameters = new TcpParameters();
                 parameters.IP = string.Join(".", Bytes.Split(parsed.DATA, 0, 4));
@@ -130,7 +127,7 @@ namespace Anviz.SDK
             var cmd = new GetDeviceSNCommand(deviceId);
             cmd.Send(stream);
             var parsed = new Response(stream);
-            if (parsed.RET == ACK_SUCCESS)
+            if (parsed.IsValid)
             {
                 return Bytes.Read(Bytes.Split(parsed.DATA, 0, 4));
             }
@@ -142,7 +139,7 @@ namespace Anviz.SDK
             var cmd = new GetDeviceTypeCommand(deviceId);
             cmd.Send(stream);
             var parsed = new Response(stream);
-            if (parsed.RET == ACK_SUCCESS)
+            if (parsed.IsValid)
             {
                 return Bytes.GetString(Bytes.Split(parsed.DATA, 0, 8));
             }
@@ -154,7 +151,7 @@ namespace Anviz.SDK
             var cmd = new ClearNewRecordsCommand(deviceId);
             cmd.Send(stream);
             var parsed = new Response(stream);
-            if (parsed.RET == ACK_SUCCESS)
+            if (parsed.IsValid)
             {
                 return true;
             }

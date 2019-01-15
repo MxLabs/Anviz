@@ -5,6 +5,9 @@ namespace Anviz.SDK.Responses
 {
     class Response
     {
+        private const byte RET_SUCCESS = 0x00;
+        private const byte RET_FAIL = 0x01;
+
         public byte STX { get; }
         public byte[] CH { get; }
         public byte ACK { get; }
@@ -12,6 +15,10 @@ namespace Anviz.SDK.Responses
         public byte[] LEN { get; }
         public byte[] DATA { get; set; }
         public byte[] CRC { get; }
+
+        public bool IsValid {
+            get => RET == RET_SUCCESS;
+        }
 
         public Response(NetworkStream stream)
         {
