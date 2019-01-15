@@ -1,4 +1,4 @@
-﻿using System.Linq;
+﻿using Anviz.SDK.Utils;
 
 namespace Anviz.SDK
 {
@@ -14,13 +14,13 @@ namespace Anviz.SDK
 
         public Response(byte[] data)
         {
-            STX = data.Take(1).First();
-            CH = data.Skip(1).Take(4).ToArray();
-            ACK = data.Skip(5).Take(1).First();
-            RET = data.Skip(6).Take(1).First();
-            LEN = data.Skip(7).Take(2).ToArray();
-            DATA = data.Skip(9).Take(data.Length - 2).ToArray();
-            CRC = data.Skip(data.Length - 2).Take(2).ToArray();
+            STX = data[0];
+            CH = Bytes.Split(data, 1, 4);
+            ACK = data[5];
+            RET = data[6];
+            LEN = Bytes.Split(data, 7, 2);
+            DATA = Bytes.Split(data, 9, data.Length - 2);
+            CRC = Bytes.Split(data, data.Length - 2, 2);
         }
     }
 }
