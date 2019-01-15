@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace Anviz.SDK.Responses
 {
-    class Response
+    public class Response
     {
         private const byte RET_SUCCESS = 0x00;
         private const byte RET_FAIL = 0x01;

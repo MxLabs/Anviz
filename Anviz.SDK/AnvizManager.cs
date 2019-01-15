@@ -30,15 +30,7 @@ namespace Anviz.SDK
         {
             var cmd = new GetRecordInfoCommand(deviceId);
             cmd.Send(stream);
-            var parsed = new Response(stream);
-            var deviceStatistic = new Statistic();
-            deviceStatistic.UserAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 0, 3));
-            deviceStatistic.FingerPrintAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 3, 3));
-            deviceStatistic.PasswordAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 6, 3));
-            deviceStatistic.CardAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 9, 3));
-            deviceStatistic.AllRecordAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 12, 3));
-            deviceStatistic.NewRecordAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 15, 3));
-            return deviceStatistic;
+            return new Statistic(stream);
         }
 
         public List<Record> DownloadRecords(uint recordAmount)

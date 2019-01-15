@@ -52,7 +52,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Responses\Response.cs" />
-    <Compile Include="Statistic.cs" />
+    <Compile Include="Responses\Statistic.cs" />
     <Compile Include="TcpParameters.cs" />
     <Compile Include="UserInfo.cs" />
     <Compile Include="Utils\Bytes.cs" />
