@@ -3,49 +3,40 @@ using Anviz.SDK.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 namespace Anviz.SDK
 {
     public class AnvizManager
     {
+        private readonly ulong deviceId;
+
         private const byte ACK_SUCCESS = 0x00;
         private const byte ACK_FAIL = 0x01;
-        private ulong deviceId = 0;
-        private Socket socket = null;
-        private string host;
-        private int port;
-        public AnvizManager(string host, ulong deviceId, int port = 5010)
+
+        private TcpClient socket;
+        private NetworkStream stream;
+
+        public AnvizManager(ulong deviceId)
         {
-            this.host = host;
-            this.port = port;
             this.deviceId = deviceId;
+            socket = new TcpClient();
         }
 
-        public bool Connect()
+        public void Connect(string host, int port = 5010)
         {
-            try
-            {
-                if (socket != null) socket.Dispose();
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(new IPEndPoint(IPAddress.Parse(host), port));
-                return true;
-            }
-            catch (SocketException e)
-            {
-                Console.WriteLine(string.Format("{0} Error code: {1}", e.Message, e.ErrorCode));
-            }
-            return false;
+            socket.Connect(host, port);
+            stream = socket.GetStream();
         }
+
         private byte[] SendCommand(Command cmd)
         {
-            socket.Send(cmd.payload);
+            stream.Write(cmd.payload, 0, cmd.payload.Length);
             Thread.Sleep(400);
             if (socket.Available > 0)
             {
                 byte[] receivedBytes = new byte[socket.Available];
-                socket.Receive(receivedBytes);
+                stream.Read(receivedBytes, 0, receivedBytes.Length);
                 return receivedBytes;
             }
             return null;
