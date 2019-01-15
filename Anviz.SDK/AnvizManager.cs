@@ -142,12 +142,8 @@ namespace Anviz.SDK
         {
             var cmd = new ClearNewRecordsCommand(deviceId);
             cmd.Send(stream);
-            var parsed = new Response(stream);
-            if (parsed.IsValid)
-            {
-                return true;
-            }
-            return false;
+            var response = new Response(stream);
+            return response.IsValid;
         }
     }
 }
