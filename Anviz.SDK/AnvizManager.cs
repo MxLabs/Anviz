@@ -83,7 +83,7 @@ namespace Anviz.SDK
                         int pos = i * 40;
                         UserInfo userInfo = new UserInfo();
                         userInfo.Id = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
-                        userInfo.Name = Bytes.GetString(Bytes.Split(values.DATA, pos + 12, 10));
+                        userInfo.Name = Bytes.GetUnicodeString(Bytes.Split(values.DATA, pos + 12, 10));
                         users.Add(userInfo);
                     }
                 }
@@ -130,10 +130,10 @@ namespace Anviz.SDK
         {
             var cmd = new GetDeviceTypeCommand(deviceId);
             cmd.Send(stream);
-            var parsed = new Response(stream);
-            if (parsed.IsValid)
+            var response = new Response(stream);
+            if (response.IsValid)
             {
-                return Bytes.GetString(Bytes.Split(parsed.DATA, 0, 8));
+                return Bytes.GetAsciiString(response.DATA);
             }
             return string.Empty;
         }

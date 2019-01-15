@@ -21,9 +21,14 @@ namespace Anviz.SDK.Utils
             return data.Skip(start).Take(count).ToArray();
         }
 
-        public static string GetString(byte[] data)
+        public static string GetUnicodeString(byte[] data)
         {
             return Encoding.BigEndianUnicode.GetString(data).TrimEnd('\0');
+        }
+
+        public static string GetAsciiString(byte[] data)
+        {
+            return Encoding.ASCII.GetString(data).TrimEnd('\0');
         }
     }
 }
