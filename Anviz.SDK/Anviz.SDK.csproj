@@ -53,7 +53,7 @@
     <Compile Include="Record.cs" />
     <Compile Include="Responses\Response.cs" />
     <Compile Include="Responses\Statistic.cs" />
-    <Compile Include="TcpParameters.cs" />
+    <Compile Include="Responses\TcpParameters.cs" />
     <Compile Include="UserInfo.cs" />
     <Compile Include="Utils\Bytes.cs" />
     <Compile Include="Utils\CRC16.cs" />

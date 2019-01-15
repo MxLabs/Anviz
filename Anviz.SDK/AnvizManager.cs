@@ -96,22 +96,7 @@ namespace Anviz.SDK
         {
             var cmd = new GetTCPParametersCommand(deviceId);
             cmd.Send(stream);
-            var parsed = new Response(stream);
-            if (parsed.IsValid)
-            {
-                var parameters = new TcpParameters();
-                parameters.IP = string.Join(".", Bytes.Split(parsed.DATA, 0, 4));
-                parameters.SubnetMask = string.Join(".", Bytes.Split(parsed.DATA, 4, 4));
-                parameters.MacAddress = string.Join("-", Bytes.Split(parsed.DATA, 8, 6));
-                parameters.DefaultGateway = string.Join(".", Bytes.Split(parsed.DATA, 14, 4));
-                parameters.Server = string.Join(".", Bytes.Split(parsed.DATA, 18, 4));
-                parameters.FarLimit = parsed.DATA[23];
-                parameters.ComPort = (int)Bytes.Read(Bytes.Split(parsed.DATA, 23, 2));
-                parameters.TcpMode = parsed.DATA[25] == 0 ? "Server Mode" : "Client Mode";
-                parameters.DhcpLimit = parsed.DATA[26];
-                return parameters;
-            }
-            return null;
+            return new TcpParameters(stream);
         }
 
         public ulong GetDeviceSN()
