@@ -51,29 +51,13 @@ namespace Anviz.SDK
             return null;
         }
 
-        private Response GenerateResponse(byte[] data)
-        {
-            Response response = null;
-            if (data != null)
-            {
-                response = new Response();
-                response.STX = data.Take(1).First();
-                response.CH = data.Skip(1).Take(4).ToArray();
-                response.ACK = data.Skip(5).Take(1).First();
-                response.RET = data.Skip(6).Take(1).First();
-                response.LEN = data.Skip(7).Take(2).ToArray();
-                response.DATA = data.Skip(9).Take(data.Length - 2).ToArray();
-                response.CRC = data.Skip(data.Length - 2).Take(2).ToArray();
-            }
-            return response;
-        }
         public Statistic GetDownloadInformation()
         {
             byte[] response = SendCommand(new GetRecordInfoCommand(deviceId));
             Statistic deviceStatistic = null;
             if (response != null)
             {
-                Response parsed = GenerateResponse(response);
+                var parsed = new Response(response);
                 deviceStatistic = new Statistic();
                 deviceStatistic.UserAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 0, 3));
                 deviceStatistic.FingerPrintAmount = (uint)Bytes.Read(Bytes.Split(parsed.DATA, 3, 3));
@@ -97,7 +81,7 @@ namespace Anviz.SDK
                 {
                     return null;
                 }
-                Response values = GenerateResponse(response);
+                var values = new Response(response);
                 if (values.RET == ACK_SUCCESS)
                 {
                     int counter = values.DATA.First();
@@ -130,7 +114,7 @@ namespace Anviz.SDK
                 {
                     return null;
                 }
-                Response values = GenerateResponse(response);
+                var values = new Response(response);
                 if (values.RET == ACK_SUCCESS)
                 {
                     uint counter = values.DATA.First();
@@ -155,7 +139,7 @@ namespace Anviz.SDK
             byte[] response = SendCommand(new GetTCPParametersCommand(deviceId));
             if (response != null)
             {
-                Response parsed = GenerateResponse(response);
+                var parsed = new Response(response);
                 if (parsed.RET == ACK_SUCCESS)
                 {
                     TcpParameters parameters = new TcpParameters();
@@ -179,7 +163,7 @@ namespace Anviz.SDK
             byte[] response = SendCommand(new GetDeviceSNCommand(deviceId));
             if (response != null)
             {
-                Response parsed = GenerateResponse(response);
+                var parsed = new Response(response);
                 if (parsed.RET == ACK_SUCCESS)
                 {
                     return Bytes.Read(Bytes.Split(parsed.DATA, 0, 4));
@@ -193,7 +177,7 @@ namespace Anviz.SDK
             byte[] response = SendCommand(new GetDeviceTypeCommand(deviceId));
             if (response != null)
             {
-                Response parsed = GenerateResponse(response);
+                var parsed = new Response(response);
                 if (parsed.RET == ACK_SUCCESS)
                 {
                     return Bytes.GetString(Bytes.Split(parsed.DATA, 0, 8));
@@ -207,7 +191,7 @@ namespace Anviz.SDK
             byte[] response = SendCommand(new ClearNewRecordsCommand(deviceId));
             if (response != null)
             {
-                Response parsed = GenerateResponse(response);
+                var parsed = new Response(response);
                 if (parsed.RET == ACK_SUCCESS)
                 {
                     return true;
