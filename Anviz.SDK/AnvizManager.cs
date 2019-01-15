@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 namespace Anviz.SDK
 {
@@ -142,7 +141,7 @@ namespace Anviz.SDK
                         int pos = i * 40;
                         UserInfo userInfo = new UserInfo();
                         userInfo.Id = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
-                        userInfo.Name = Encoding.BigEndianUnicode.GetString(Bytes.Split(values.DATA, pos + 12, 10)).TrimEnd('\0');
+                        userInfo.Name = Bytes.GetString(Bytes.Split(values.DATA, pos + 12, 10));
                         users.Add(userInfo);
                     }
                 }
@@ -197,7 +196,7 @@ namespace Anviz.SDK
                 Response parsed = GenerateResponse(response);
                 if (parsed.RET == ACK_SUCCESS)
                 {
-                    return Encoding.BigEndianUnicode.GetString(Bytes.Split(parsed.DATA, 0, 8)).TrimEnd('\0');
+                    return Bytes.GetString(Bytes.Split(parsed.DATA, 0, 8));
                 }
             }
             return string.Empty;

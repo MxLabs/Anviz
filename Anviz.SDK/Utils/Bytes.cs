@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 
 namespace Anviz.SDK.Utils
 {
@@ -18,6 +19,11 @@ namespace Anviz.SDK.Utils
         public static byte[] Split(byte[] data, int start, int count)
         {
             return data.Skip(start).Take(count).ToArray();
+        }
+
+        public static string GetString(byte[] data)
+        {
+            return Encoding.BigEndianUnicode.GetString(data).TrimEnd('\0');
         }
     }
 }
