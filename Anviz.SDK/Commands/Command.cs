@@ -1,5 +1,6 @@
 ﻿using Anviz.SDK.Utils;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -35,9 +36,9 @@ namespace Anviz.SDK.Commands
             payload[8 + dataLength] = (byte)(crc % 256);
         }
 
-        public void Send(NetworkStream stream)
+        public async Task Send(NetworkStream stream)
         {
-            stream.Write(payload, 0, payload.Length);
+            await stream.WriteAsync(payload, 0, payload.Length);
         }
     }
 }

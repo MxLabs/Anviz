@@ -3,6 +3,8 @@ using Anviz.SDK.Responses;
 using Anviz.SDK.Utils;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+
 namespace Anviz.SDK
 {
     public class AnvizManager
@@ -18,40 +20,41 @@ namespace Anviz.SDK
             socket = new TcpClient();
         }
 
-        public void Connect(string host, int port = 5010)
+        public async Task Connect(string host, int port = 5010)
         {
-            socket.Connect(host, port);
+            await socket.ConnectAsync(host, port);
             stream = socket.GetStream();
         }
 
-        private Response SendCommand(Command cmd)
+        private async Task<Response> SendCommand(Command cmd)
         {
-            cmd.Send(stream);
-            return Response.FromStream(stream);
+            await cmd.Send(stream);
+            return await Response.FromStream(stream);
         }
 
-        public Statistic GetDownloadInformation()
+        public async Task<Statistic> GetDownloadInformation()
         {
-            var response = SendCommand(new GetRecordInfoCommand(deviceId));
+            var response = await SendCommand(new GetRecordInfoCommand(deviceId));
             return new Statistic(response.DATA);
         }
 
-        public List<Record> DownloadRecords(bool onlyNew = false)
+        public async Task<List<Record>> DownloadRecords(bool onlyNew = false)
         {
+            var statistics = await GetDownloadInformation();
             uint recordAmount;
             if (onlyNew)
             {
-                recordAmount = GetDownloadInformation().NewRecordAmount;
+                recordAmount = statistics.NewRecordAmount;
             }
             else
             {
-                recordAmount = GetDownloadInformation().AllRecordAmount;
+                recordAmount = statistics.AllRecordAmount;
             }
             List<Record> records = new List<Record>();
             bool isFirst = true;
             while (recordAmount > 0)
             {
-                var response = SendCommand(new GetRecordsCommand(deviceId, isFirst, onlyNew, recordAmount));
+                var response = await SendCommand(new GetRecordsCommand(deviceId, isFirst, onlyNew, recordAmount));
                 uint counter = response.DATA[0];
                 recordAmount -= counter;
                 for (int i = 0; i < counter; i++)
@@ -62,14 +65,15 @@ namespace Anviz.SDK
             }
             return records;
         }
-        public List<UserInfo> GetEmployeesData()
+        public async Task<List<UserInfo>> GetEmployeesData()
         {
-            var userAmount = GetDownloadInformation().UserAmount;
+            var statistics = await GetDownloadInformation();
+            var userAmount = statistics.UserAmount;
             List<UserInfo> users = new List<UserInfo>();
             bool isFirst = true;
             while (userAmount > 0)
             {
-                var response = SendCommand(new GetStaffDataCommand(deviceId, isFirst, userAmount));
+                var response = await SendCommand(new GetStaffDataCommand(deviceId, isFirst, userAmount));
                 uint counter = response.DATA[0];
                 userAmount -= counter;
                 for (int i = 0; i < counter; i++)
@@ -81,27 +85,27 @@ namespace Anviz.SDK
             return users;
         }
 
-        public TcpParameters GetTcpParameters()
+        public async Task<TcpParameters> GetTcpParameters()
         {
-            var response = SendCommand(new GetTCPParametersCommand(deviceId));
+            var response = await SendCommand(new GetTCPParametersCommand(deviceId));
             return new TcpParameters(response.DATA);
         }
 
-        public ulong GetDeviceSN()
+        public async Task<ulong> GetDeviceSN()
         {
-            var response = SendCommand(new GetDeviceSNCommand(deviceId));
+            var response = await SendCommand(new GetDeviceSNCommand(deviceId));
             return Bytes.Read(response.DATA);
         }
 
-        public string GetDeviceTypeCode()
+        public async Task<string> GetDeviceTypeCode()
         {
-            var response = SendCommand(new GetDeviceTypeCommand(deviceId));
+            var response = await SendCommand(new GetDeviceTypeCommand(deviceId));
             return Bytes.GetAsciiString(response.DATA);
         }
 
-        public void ClearNewRecords()
+        public async Task ClearNewRecords()
         {
-            SendCommand(new ClearNewRecordsCommand(deviceId));
+            await SendCommand(new ClearNewRecordsCommand(deviceId));
         }
     }
 }

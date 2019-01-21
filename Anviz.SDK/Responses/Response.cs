@@ -1,6 +1,7 @@
 ﻿using Anviz.SDK.Utils;
 using System;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Responses
 {
@@ -27,13 +28,13 @@ namespace Anviz.SDK.Responses
             DATA = Bytes.Split(data, 9, data.Length - 2);
             CRC = Bytes.Split(data, data.Length - 2, 2);
 
-            if(RET != RET_SUCCESS)
+            if (RET != RET_SUCCESS)
             {
                 throw new Exception("Invalid response");
             }
         }
 
-        public static Response FromStream(NetworkStream stream)
+        public static async Task<Response> FromStream(NetworkStream stream)
         {
             /*
              * Ethernet MTU is slightly less than 1500
@@ -43,7 +44,7 @@ namespace Anviz.SDK.Responses
              * building the response vars and reading the LEN value
              */
             byte[] data = new byte[1500];
-            stream.Read(data, 0, data.Length);
+            await stream.ReadAsync(data, 0, data.Length);
             return new Response(data);
         }
     }
