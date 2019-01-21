@@ -36,8 +36,9 @@ namespace Anviz.SDK
             return new Statistic(response.DATA);
         }
 
-        public List<Record> DownloadRecords(uint recordAmount)
+        public List<Record> DownloadRecords()
         {
+            var recordAmount = GetDownloadInformation().AllRecordAmount;
             List<Record> records = new List<Record>();
             bool isFirst = true;
             while (recordAmount > 0)
@@ -53,8 +54,9 @@ namespace Anviz.SDK
             }
             return records;
         }
-        public List<UserInfo> GetEmployeesData(uint userAmount)
+        public List<UserInfo> GetEmployeesData()
         {
+            var userAmount = GetDownloadInformation().UserAmount;
             List<UserInfo> users = new List<UserInfo>();
             bool isFirst = true;
             while (userAmount > 0)
