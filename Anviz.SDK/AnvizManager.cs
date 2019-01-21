@@ -3,7 +3,6 @@ using Anviz.SDK.Responses;
 using Anviz.SDK.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 namespace Anviz.SDK
 {
@@ -43,20 +42,12 @@ namespace Anviz.SDK
             {
                 var cmd = new GetRecordsCommand(deviceId, isFirst, recordAmount);
                 cmd.Send(stream);
-                var values = new Response(stream);
-                int counter = values.DATA.First();
-                recordAmount -= (uint)counter;
-                values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
+                var response = Response.FromStream(stream);
+                uint counter = response.DATA[0];
+                recordAmount -= counter;
                 for (int i = 0; i < counter; i++)
                 {
-                    int pos = i * 14;
-                    Record record = new Record();
-                    record.UserCode = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
-                    record.DateTime = Bytes.Read(Bytes.Split(values.DATA, pos + 5, 4));
-                    record.BackupCode = values.DATA[pos + 10];
-                    record.RecordType = values.DATA[pos + 11];
-                    record.WorkType = (uint)Bytes.Read(Bytes.Split(values.DATA, pos + 12, 3));
-                    records.Add(record);
+                    records.Add(new Record(response.DATA, i * 14 + 1));
                 }
                 isFirst = false;
             }
@@ -70,17 +61,12 @@ namespace Anviz.SDK
             {
                 var cmd = new GetStaffDataCommand(deviceId, isFirst, userAmount);
                 cmd.Send(stream);
-                var values = new Response(stream);
-                uint counter = values.DATA.First();
+                var response = Response.FromStream(stream);
+                uint counter = response.DATA[0];
                 userAmount -= counter;
-                values.DATA = Bytes.Split(values.DATA, 1, values.DATA.Length);
                 for (int i = 0; i < counter; i++)
                 {
-                    int pos = i * 40;
-                    UserInfo userInfo = new UserInfo();
-                    userInfo.Id = Bytes.Read(Bytes.Split(values.DATA, pos, 5));
-                    userInfo.Name = Bytes.GetUnicodeString(Bytes.Split(values.DATA, pos + 12, 10));
-                    users.Add(userInfo);
+                    users.Add(new UserInfo(response.DATA, i * 40 + 1));
                 }
                 isFirst = false;
             }

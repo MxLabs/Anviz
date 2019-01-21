@@ -14,7 +14,7 @@ namespace Anviz.SDK.Responses
         public byte ACK { get; }
         public byte RET { get; }
         public byte[] LEN { get; }
-        public byte[] DATA { get; set; }
+        public byte[] DATA { get; }
         public byte[] CRC { get; }
 
         public Response(byte[] data)
