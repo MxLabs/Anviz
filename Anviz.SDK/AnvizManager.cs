@@ -1,7 +1,6 @@
 ﻿using Anviz.SDK.Commands;
 using Anviz.SDK.Responses;
 using Anviz.SDK.Utils;
-using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 namespace Anviz.SDK
@@ -41,7 +40,6 @@ namespace Anviz.SDK
         {
             List<Record> records = new List<Record>();
             bool isFirst = true;
-            DateTime defaultDate = new DateTime(2000, 01, 02, 0, 0, 0);
             while (recordAmount > 0)
             {
                 var response = SendCommand(new GetRecordsCommand(deviceId, isFirst, recordAmount));
