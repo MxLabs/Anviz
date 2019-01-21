@@ -1,9 +1,8 @@
 ﻿using Anviz.SDK.Utils;
-using System.Net.Sockets;
 
 namespace Anviz.SDK.Responses
 {
-    public class Statistic : Response
+    public class Statistic
     {
         public uint UserAmount { get; }
         public uint FingerPrintAmount { get; }
@@ -12,14 +11,14 @@ namespace Anviz.SDK.Responses
         public uint AllRecordAmount { get; }
         public uint NewRecordAmount { get; }
 
-        public Statistic(NetworkStream stream) : base(stream)
+        public Statistic(byte[] data)
         {
-            UserAmount = (uint)Bytes.Read(Bytes.Split(DATA, 0, 3));
-            FingerPrintAmount = (uint)Bytes.Read(Bytes.Split(DATA, 3, 3));
-            PasswordAmount = (uint)Bytes.Read(Bytes.Split(DATA, 6, 3));
-            CardAmount = (uint)Bytes.Read(Bytes.Split(DATA, 9, 3));
-            AllRecordAmount = (uint)Bytes.Read(Bytes.Split(DATA, 12, 3));
-            NewRecordAmount = (uint)Bytes.Read(Bytes.Split(DATA, 15, 3));
+            UserAmount = (uint)Bytes.Read(Bytes.Split(data, 0, 3));
+            FingerPrintAmount = (uint)Bytes.Read(Bytes.Split(data, 3, 3));
+            PasswordAmount = (uint)Bytes.Read(Bytes.Split(data, 6, 3));
+            CardAmount = (uint)Bytes.Read(Bytes.Split(data, 9, 3));
+            AllRecordAmount = (uint)Bytes.Read(Bytes.Split(data, 12, 3));
+            NewRecordAmount = (uint)Bytes.Read(Bytes.Split(data, 15, 3));
         }
 
         public override string ToString()

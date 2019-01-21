@@ -1,9 +1,8 @@
 ﻿using Anviz.SDK.Utils;
-using System.Net.Sockets;
 
 namespace Anviz.SDK.Responses
 {
-    public class TcpParameters : Response
+    public class TcpParameters
     {
         public string IP { get; }
         public string SubnetMask { get; }
@@ -15,17 +14,17 @@ namespace Anviz.SDK.Responses
         public string TcpMode { get; }
         public int DhcpLimit { get; }
 
-        public TcpParameters(NetworkStream stream) : base(stream)
+        public TcpParameters(byte[] data)
         {
-            IP = string.Join(".", Bytes.Split(DATA, 0, 4));
-            SubnetMask = string.Join(".", Bytes.Split(DATA, 4, 4));
-            MacAddress = string.Join("-", Bytes.Split(DATA, 8, 6));
-            DefaultGateway = string.Join(".", Bytes.Split(DATA, 14, 4));
-            Server = string.Join(".", Bytes.Split(DATA, 18, 4));
-            FarLimit = DATA[23];
-            ComPort = (int)Bytes.Read(Bytes.Split(DATA, 23, 2));
-            TcpMode = DATA[25] == 0 ? "Server Mode" : "Client Mode";
-            DhcpLimit = DATA[26];
+            IP = string.Join(".", Bytes.Split(data, 0, 4));
+            SubnetMask = string.Join(".", Bytes.Split(data, 4, 4));
+            MacAddress = string.Join("-", Bytes.Split(data, 8, 6));
+            DefaultGateway = string.Join(".", Bytes.Split(data, 14, 4));
+            Server = string.Join(".", Bytes.Split(data, 18, 4));
+            FarLimit = data[23];
+            ComPort = (int)Bytes.Read(Bytes.Split(data, 23, 2));
+            TcpMode = data[25] == 0 ? "Server Mode" : "Client Mode";
+            DhcpLimit = data[26];
         }
     }
 }

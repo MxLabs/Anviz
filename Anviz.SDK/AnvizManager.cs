@@ -30,7 +30,8 @@ namespace Anviz.SDK
         {
             var cmd = new GetRecordInfoCommand(deviceId);
             cmd.Send(stream);
-            return new Statistic(stream);
+            var response = Response.FromStream(stream);
+            return new Statistic(response.DATA);
         }
 
         public List<Record> DownloadRecords(uint recordAmount)
@@ -90,14 +91,15 @@ namespace Anviz.SDK
         {
             var cmd = new GetTCPParametersCommand(deviceId);
             cmd.Send(stream);
-            return new TcpParameters(stream);
+            var response = Response.FromStream(stream);
+            return new TcpParameters(response.DATA);
         }
 
         public ulong GetDeviceSN()
         {
             var cmd = new GetDeviceSNCommand(deviceId);
             cmd.Send(stream);
-            var response = new Response(stream);
+            var response = Response.FromStream(stream);
             return Bytes.Read(response.DATA);
         }
 
@@ -105,7 +107,7 @@ namespace Anviz.SDK
         {
             var cmd = new GetDeviceTypeCommand(deviceId);
             cmd.Send(stream);
-            var response = new Response(stream);
+            var response = Response.FromStream(stream);
             return Bytes.GetAsciiString(response.DATA);
         }
 
@@ -113,7 +115,7 @@ namespace Anviz.SDK
         {
             var cmd = new ClearNewRecordsCommand(deviceId);
             cmd.Send(stream);
-            var response = new Response(stream); //ensure correct response
+            Response.FromStream(stream);
         }
     }
 }
