@@ -25,11 +25,15 @@ namespace Anviz.SDK
             stream = socket.GetStream();
         }
 
+        private Response SendCommand(Command cmd)
+        {
+            cmd.Send(stream);
+            return Response.FromStream(stream);
+        }
+
         public Statistic GetDownloadInformation()
         {
-            var cmd = new GetRecordInfoCommand(deviceId);
-            cmd.Send(stream);
-            var response = Response.FromStream(stream);
+            var response = SendCommand(new GetRecordInfoCommand(deviceId));
             return new Statistic(response.DATA);
         }
 
@@ -40,9 +44,7 @@ namespace Anviz.SDK
             DateTime defaultDate = new DateTime(2000, 01, 02, 0, 0, 0);
             while (recordAmount > 0)
             {
-                var cmd = new GetRecordsCommand(deviceId, isFirst, recordAmount);
-                cmd.Send(stream);
-                var response = Response.FromStream(stream);
+                var response = SendCommand(new GetRecordsCommand(deviceId, isFirst, recordAmount));
                 uint counter = response.DATA[0];
                 recordAmount -= counter;
                 for (int i = 0; i < counter; i++)
@@ -59,9 +61,7 @@ namespace Anviz.SDK
             bool isFirst = true;
             while (userAmount > 0)
             {
-                var cmd = new GetStaffDataCommand(deviceId, isFirst, userAmount);
-                cmd.Send(stream);
-                var response = Response.FromStream(stream);
+                var response = SendCommand(new GetStaffDataCommand(deviceId, isFirst, userAmount));
                 uint counter = response.DATA[0];
                 userAmount -= counter;
                 for (int i = 0; i < counter; i++)
@@ -75,33 +75,25 @@ namespace Anviz.SDK
 
         public TcpParameters GetTcpParameters()
         {
-            var cmd = new GetTCPParametersCommand(deviceId);
-            cmd.Send(stream);
-            var response = Response.FromStream(stream);
+            var response = SendCommand(new GetTCPParametersCommand(deviceId));
             return new TcpParameters(response.DATA);
         }
 
         public ulong GetDeviceSN()
         {
-            var cmd = new GetDeviceSNCommand(deviceId);
-            cmd.Send(stream);
-            var response = Response.FromStream(stream);
+            var response = SendCommand(new GetDeviceSNCommand(deviceId));
             return Bytes.Read(response.DATA);
         }
 
         public string GetDeviceTypeCode()
         {
-            var cmd = new GetDeviceTypeCommand(deviceId);
-            cmd.Send(stream);
-            var response = Response.FromStream(stream);
+            var response = SendCommand(new GetDeviceTypeCommand(deviceId));
             return Bytes.GetAsciiString(response.DATA);
         }
 
         public void ClearNewRecords()
         {
-            var cmd = new ClearNewRecordsCommand(deviceId);
-            cmd.Send(stream);
-            Response.FromStream(stream);
+            SendCommand(new ClearNewRecordsCommand(deviceId));
         }
     }
 }
