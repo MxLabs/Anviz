@@ -36,14 +36,22 @@ namespace Anviz.SDK
             return new Statistic(response.DATA);
         }
 
-        public List<Record> DownloadRecords()
+        public List<Record> DownloadRecords(bool onlyNew = false)
         {
-            var recordAmount = GetDownloadInformation().AllRecordAmount;
+            uint recordAmount;
+            if (onlyNew)
+            {
+                recordAmount = GetDownloadInformation().NewRecordAmount;
+            }
+            else
+            {
+                recordAmount = GetDownloadInformation().AllRecordAmount;
+            }
             List<Record> records = new List<Record>();
             bool isFirst = true;
             while (recordAmount > 0)
             {
-                var response = SendCommand(new GetRecordsCommand(deviceId, isFirst, recordAmount));
+                var response = SendCommand(new GetRecordsCommand(deviceId, isFirst, onlyNew, recordAmount));
                 uint counter = response.DATA[0];
                 recordAmount -= counter;
                 for (int i = 0; i < counter; i++)
