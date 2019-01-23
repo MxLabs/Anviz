@@ -41,12 +41,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnvizManager.cs" />
+    <Compile Include="Commands\ClearNewRecordsCommand.cs" />
+    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\GetDeviceSNCommand.cs" />
+    <Compile Include="Commands\GetDeviceTypeCommand.cs" />
+    <Compile Include="Commands\GetRecordInfoCommand.cs" />
+    <Compile Include="Commands\GetRecordsCommand.cs" />
+    <Compile Include="Commands\GetStaffDataCommand.cs" />
+    <Compile Include="Commands\GetTCPParametersCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Record.cs" />
-    <Compile Include="Response.cs" />
-    <Compile Include="Statistic.cs" />
-    <Compile Include="TcpParameters.cs" />
-    <Compile Include="UserInfo.cs" />
+    <Compile Include="Responses\Record.cs" />
+    <Compile Include="Responses\Response.cs" />
+    <Compile Include="Responses\Statistic.cs" />
+    <Compile Include="Responses\TcpParameters.cs" />
+    <Compile Include="Responses\UserInfo.cs" />
+    <Compile Include="Utils\Bytes.cs" />
+    <Compile Include="Utils\CRC16.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
