@@ -1,3 +1,6 @@
+
+<a href="https://www.nuget.org/packages/Anviz.SDK"><img src="https://img.shields.io/nuget/v/anviz.sdk.svg?style=flat"></a>
+
 # Anviz
 
 .NET library to access and control Anviz devices.
