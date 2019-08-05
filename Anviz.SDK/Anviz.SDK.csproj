@@ -3,6 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <ProjectGuid>{30099B6A-183A-4003-8449-8F36A06462BA}</ProjectGuid>
+    <Authors>Huseyin DEMIRTAS, Gianni Angelozzi</Authors>
+    <Company>MxLabs</Company>
+    <Description>.NET library to access and control Anviz devices.</Description>
+    <PackageProjectUrl>https://github.com/MxLabs/Anviz</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/MxLabs/Anviz</RepositoryUrl>
+    <PackageTags>anviz access-control fingerprint</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
 </Project>
