@@ -7,8 +7,8 @@ namespace Sample
 {
     class Program
     {
-        private const ulong DEVICE_ID = 1;
-        private const string DEVICE_HOST = "192.168.0.10";
+        private const ulong DEVICE_ID = 0;
+        private const string DEVICE_HOST = "10.0.0.1";
         static async Task Main(string[] args)
         {
             var manager = new AnvizManager(DEVICE_ID);
@@ -17,6 +17,8 @@ namespace Sample
                 var sn = await device.GetDeviceSN();
                 var type = await device.GetDeviceTypeCode();
                 Console.WriteLine($"Connected to device {type} with SN {sn.ToString()}");
+                var net = await device.GetTcpParameters();
+                Console.WriteLine($"Device IP is {net.IP} {net.SubnetMask} {net.DefaultGateway} {net.MacAddress} mode is {net.TcpMode.ToString()}");
                 var employees = await device.GetEmployeesData();
                 var dict = new Dictionary<ulong, string>();
                 foreach (var employee in employees)
@@ -27,15 +29,10 @@ namespace Sample
                 var records = await device.DownloadRecords(false); //true to get only new records
                 foreach (var rec in records)
                 {
-                    var t = ULongToDateTime(rec.DateTime);
-                    Console.WriteLine($"Employee {dict[rec.UserCode]} at {t.ToLongDateString()} {t.ToLongTimeString()}");
+                    Console.WriteLine($"Employee {dict[rec.UserCode]} at {rec.DateTime.ToLongDateString()} {rec.DateTime.ToLongTimeString()}");
                 }
             }
-        }
-
-        private static DateTime ULongToDateTime(ulong value)
-        {
-            return new DateTime(2000, 1, 2).AddSeconds(value);
+            Console.ReadLine();
         }
     }
 }
