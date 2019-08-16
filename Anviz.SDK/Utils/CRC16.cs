@@ -2,7 +2,7 @@
 {
     static class CRC16
     {
-        private static ushort[] CRCTABLE = new ushort[]{
+        private static readonly ushort[] CRCTABLE = new ushort[]{
              0x0000,0x1189,0x2312,0x329B,0x4624,0x57AD,0x6536,0x74BF,0x8C48,0x9DC1,
              0xAF5A,0xBED3,0xCA6C,0xDBE5,0xE97E,0xF8F7,0x1081,0x0108,0x3393,0x221A,
              0x56A5,0x472C,0x75B7,0x643E,0x9CC9,0x8D40,0xBFDB,0xAE52,0xDAED,0xCB64,
@@ -31,10 +31,10 @@
              0x58D5,0x495C,0x3DE3,0x2C6A,0x1EF1,0x0F78
         };
 
-        public static ushort Compute(byte[] data)
+        public static ushort Compute(byte[] data, int lenght)
         {
             ushort crc = 0xFFFF;
-            for (int i = 0; i < data.Length; i++)
+            for (int i = 0; i < lenght; i++)
             {
                 var temp = (ushort)(crc ^ data[i]);
                 crc = (ushort)((crc >> 8) ^ CRCTABLE[temp & 0x00FF]);
