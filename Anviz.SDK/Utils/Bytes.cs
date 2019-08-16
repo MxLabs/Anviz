@@ -8,10 +8,10 @@ namespace Anviz.SDK.Utils
         public static ulong Read(byte[] data)
         {
             ulong result = 0;
-            for (int i = 0; i < data.Length; i++)
+            for (var i = 0; i < data.Length; i++)
             {
-                ulong b = (ulong)(data[data.Length - 1 - i] % 256);
-                result += (ulong)(b << (byte)(i * 8));
+                var b = (ulong)(data[data.Length - 1 - i] % 256);
+                result += b << (byte)(i * 8);
             }
             return result;
         }

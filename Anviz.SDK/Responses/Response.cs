@@ -43,7 +43,7 @@ namespace Anviz.SDK.Responses
              * A better way is done by reading the first 10 bytes,
              * building the response vars and reading the LEN value
              */
-            byte[] data = new byte[1500];
+            var data = new byte[1500];
             await stream.ReadAsync(data, 0, data.Length);
             return new Response(data);
         }
