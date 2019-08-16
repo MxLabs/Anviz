@@ -21,7 +21,7 @@ namespace Anviz.SDK.Responses
             MacAddress = string.Join("-", Bytes.Split(data, 8, 6));
             DefaultGateway = string.Join(".", Bytes.Split(data, 14, 4));
             Server = string.Join(".", Bytes.Split(data, 18, 4));
-            FarLimit = data[23];
+            FarLimit = data[22];
             ComPort = (int)Bytes.Read(Bytes.Split(data, 23, 2));
             TcpMode = data[25] == 0 ? "Server Mode" : "Client Mode";
             DhcpLimit = data[26];

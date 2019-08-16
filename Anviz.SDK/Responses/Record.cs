@@ -14,9 +14,9 @@ namespace Anviz.SDK.Responses
         {
             UserCode = Bytes.Read(Bytes.Split(data, offset, 5));
             DateTime = Bytes.Read(Bytes.Split(data, offset + 5, 4));
-            BackupCode = data[offset + 10];
-            RecordType = data[offset + 11];
-            WorkType = (uint)Bytes.Read(Bytes.Split(data, offset + 12, 3));
+            BackupCode = data[offset + 9];
+            RecordType = data[offset + 10];
+            WorkType = (uint)Bytes.Read(Bytes.Split(data, offset + 11, 3));
         }
 
         public override string ToString()
