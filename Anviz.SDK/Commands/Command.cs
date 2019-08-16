@@ -7,6 +7,7 @@ namespace Anviz.SDK.Commands
 {
     abstract class Command
     {
+        public byte ResponseCode { get; private set; }
         protected byte[] Payload { get; private set; }
 
         protected ulong DeviceId { get; }
@@ -18,6 +19,7 @@ namespace Anviz.SDK.Commands
 
         protected void BuildPayload(byte command, byte[] data)
         {
+            ResponseCode = (byte)(command + 0x80);
             var dataLength = (ushort)data.Length;
             if(dataLength > 400)
             {

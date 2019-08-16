@@ -25,7 +25,7 @@ namespace Anviz.SDK
         private async Task<Response> SendCommand(Command cmd)
         {
             await cmd.Send(DeviceStream);
-            return await Response.FromStream(DeviceStream);
+            return await Response.FromStream(cmd.ResponseCode, DeviceStream);
         }
 
         public async Task<Statistic> GetDownloadInformation()
