@@ -11,23 +11,25 @@ namespace Sample
         private const string DEVICE_HOST = "192.168.0.10";
         static async Task Main(string[] args)
         {
-            var reader = new AnvizManager(DEVICE_ID);
-            await reader.Connect(DEVICE_HOST);
-            var sn = await reader.GetDeviceSN();
-            var type = await reader.GetDeviceTypeCode();
-            Console.WriteLine($"Connected to device {type} with SN {sn.ToString()}");
-            var employees = await reader.GetEmployeesData();
-            var dict = new Dictionary<ulong, string>();
-            foreach (var employee in employees)
+            var manager = new AnvizManager(DEVICE_ID);
+            using (var device = await manager.Connect(DEVICE_HOST))
             {
-                dict.Add(employee.Id, employee.Name);
-                Console.WriteLine($"Employee {employee.Id} -> {employee.Name}");
-            }
-            var records = await reader.DownloadRecords(false); //true to get only new records
-            foreach (var rec in records)
-            {
-                var t = ULongToDateTime(rec.DateTime);
-                Console.WriteLine($"Employee {dict[rec.UserCode]} at {t.ToLongDateString()} {t.ToLongTimeString()}");
+                var sn = await device.GetDeviceSN();
+                var type = await device.GetDeviceTypeCode();
+                Console.WriteLine($"Connected to device {type} with SN {sn.ToString()}");
+                var employees = await device.GetEmployeesData();
+                var dict = new Dictionary<ulong, string>();
+                foreach (var employee in employees)
+                {
+                    dict.Add(employee.Id, employee.Name);
+                    Console.WriteLine($"Employee {employee.Id} -> {employee.Name}");
+                }
+                var records = await device.DownloadRecords(false); //true to get only new records
+                foreach (var rec in records)
+                {
+                    var t = ULongToDateTime(rec.DateTime);
+                    Console.WriteLine($"Employee {dict[rec.UserCode]} at {t.ToLongDateString()} {t.ToLongTimeString()}");
+                }
             }
         }
 
