@@ -51,7 +51,7 @@ namespace Anviz.SDK
         {
             var statistics = await GetDownloadInformation();
             var recordAmount = onlyNew ? statistics.NewRecordAmount : statistics.AllRecordAmount;
-            var records = new List<Record>();
+            var records = new List<Record>((int)recordAmount);
             var isFirst = true;
             while (recordAmount > 0)
             {
@@ -71,7 +71,7 @@ namespace Anviz.SDK
         {
             var statistics = await GetDownloadInformation();
             var userAmount = statistics.UserAmount;
-            var users = new List<UserInfo>();
+            var users = new List<UserInfo>((int)userAmount);
             var isFirst = true;
             while (userAmount > 0)
             {
