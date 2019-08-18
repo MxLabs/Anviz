@@ -50,15 +50,7 @@ namespace Anviz.SDK
         public async Task<List<Record>> DownloadRecords(bool onlyNew = false)
         {
             var statistics = await GetDownloadInformation();
-            uint recordAmount;
-            if (onlyNew)
-            {
-                recordAmount = statistics.NewRecordAmount;
-            }
-            else
-            {
-                recordAmount = statistics.AllRecordAmount;
-            }
+            var recordAmount = onlyNew ? statistics.NewRecordAmount : statistics.AllRecordAmount;
             var records = new List<Record>();
             var isFirst = true;
             while (recordAmount > 0)
@@ -74,6 +66,7 @@ namespace Anviz.SDK
             }
             return records;
         }
+
         public async Task<List<UserInfo>> GetEmployeesData()
         {
             var statistics = await GetDownloadInformation();
