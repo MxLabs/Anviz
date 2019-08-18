@@ -28,6 +28,19 @@ namespace Anviz.SDK
             return await Response.FromStream(cmd.ResponseCode, DeviceStream);
         }
 
+        public async Task<DateTime> GetDateTime()
+        {
+            var cmd = new GetDateTimeCommand(DeviceId);
+            var response = await SendCommand(cmd);
+            return DateConversions.ByteArrayToDateTime(response.DATA);
+        }
+
+        public async Task SetDateTime(DateTime dateTime)
+        {
+            var cmd = new SetDateTimeCommand(DeviceId, dateTime);
+            await SendCommand(cmd);
+        }
+
         public async Task<Statistic> GetDownloadInformation()
         {
             var response = await SendCommand(new GetRecordInfoCommand(DeviceId));

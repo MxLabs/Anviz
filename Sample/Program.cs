@@ -17,6 +17,14 @@ namespace Sample
                 var sn = await device.GetDeviceSN();
                 var type = await device.GetDeviceTypeCode();
                 Console.WriteLine($"Connected to device {type} with SN {sn.ToString()}");
+                var now = DateTime.Now;
+                var deviceTime = await device.GetDateTime();
+                Console.WriteLine($"Current device time is {deviceTime.ToShortDateString()} {deviceTime.ToShortTimeString()}");
+                if ((now - deviceTime).TotalSeconds > 1)
+                {
+                    await device.SetDateTime(now);
+                    Console.WriteLine("Updated device time according to local time");
+                }
                 var net = await device.GetTcpParameters();
                 Console.WriteLine($"Device IP is {net.IP} {net.SubnetMask} {net.DefaultGateway} {net.MacAddress} mode is {net.TcpMode.ToString()}");
                 var employees = await device.GetEmployeesData();
