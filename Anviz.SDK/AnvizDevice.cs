@@ -87,6 +87,12 @@ namespace Anviz.SDK
             return users;
         }
 
+        public async Task<byte[]> GetFingerprintTemplate(ulong employeeID, Finger finger)
+        {
+            var response = await SendCommand(new GetFingerprintTemplateCommand(DeviceId, employeeID, finger));
+            return response.DATA;
+        }
+
         public async Task<TcpParameters> GetTcpParameters()
         {
             var response = await SendCommand(new GetTCPParametersCommand(DeviceId));

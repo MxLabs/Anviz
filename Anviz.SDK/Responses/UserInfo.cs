@@ -1,5 +1,5 @@
 ﻿using Anviz.SDK.Utils;
-using System;
+using System.Collections.Generic;
 
 namespace Anviz.SDK.Responses
 {
@@ -9,7 +9,7 @@ namespace Anviz.SDK.Responses
         public ulong? Password { get; }
         public ulong? Card { get; }
         public string Name { get; }
-        public Fingers EnrolledFingerprints { get; }
+        public List<Finger> EnrolledFingerprints { get; }
         public byte Department { get; }
         public byte Group { get; }
         public byte Mode { get; }
@@ -44,7 +44,7 @@ namespace Anviz.SDK.Responses
             Department = data[offset + 32];
             Group = data[offset + 33];
             Mode = data[offset + 34];
-            EnrolledFingerprints = (Fingers)Bytes.Read(Bytes.Split(data, offset + 35, 2));
+            EnrolledFingerprints = Fingers.DecodeFingers(Bytes.Read(Bytes.Split(data, offset + 35, 2)));
             PWDH8 = data[offset + 37];
             Keep = data[offset + 38];
             Message = data[offset + 39];
@@ -52,22 +52,7 @@ namespace Anviz.SDK.Responses
 
         public override string ToString()
         {
-            return $"Id: {Id}\r\nName: {Name}\r\nPassword: {Password}\r\nCard: {Card}\r\nFingers: {EnrolledFingerprints}";
+            return $"Id: {Id}\r\nName: {Name}\r\nPassword: {Password}\r\nCard: {Card}\r\nFingers: {string.Join(", ", EnrolledFingerprints)}";
         }
-    }
-
-    [Flags]
-    public enum Fingers
-    {
-        RightThumb  = 1 << 0,
-        RightIndex  = 1 << 1,
-        RightMiddle = 1 << 2,
-        RightAnular = 1 << 3,
-        RightLittle = 1 << 4,
-        LeftLittle  = 1 << 5,
-        LeftAnular  = 1 << 6,
-        LeftMiddle  = 1 << 7,
-        LeftIndex   = 1 << 8,
-        LeftThumb   = 1 << 9,
     }
 }

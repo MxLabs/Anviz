@@ -32,7 +32,12 @@ namespace Sample
                 foreach (var employee in employees)
                 {
                     dict.Add(employee.Id, employee.Name);
-                    Console.WriteLine($"Employee {employee.Id} -> {employee.Name} pwd {employee.Password} card {employee.Card} fp {employee.EnrolledFingerprints}");
+                    Console.WriteLine($"Employee {employee.Id} -> {employee.Name} pwd {employee.Password} card {employee.Card} fp {string.Join(", ", employee.EnrolledFingerprints)}");
+                    foreach(var f in employee.EnrolledFingerprints)
+                    {
+                        var fp = await device.GetFingerprintTemplate(employee.Id, f);
+                        Console.WriteLine($"-> {f} {Convert.ToBase64String(fp)}");
+                    }
                 }
                 var records = await device.DownloadRecords(false); //true to get only new records
                 foreach (var rec in records)

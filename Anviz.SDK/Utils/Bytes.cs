@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Anviz.SDK.Utils
@@ -14,6 +15,22 @@ namespace Anviz.SDK.Utils
                 result += b << (byte)(i * 8);
             }
             return result;
+        }
+
+        public static byte[] Write(int length, ulong value)
+        {
+            var ret = new List<byte>();
+            while (value > 0)
+            {
+                ret.Add((byte)(value % 256));
+                value >>= 8;
+            }
+            while (length != ret.Count)
+            {
+                ret.Add(0);
+            }
+            ret.Reverse();
+            return ret.ToArray();
         }
 
         public static byte[] Split(byte[] data, int start, int count)
