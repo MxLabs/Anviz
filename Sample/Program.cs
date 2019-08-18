@@ -32,7 +32,7 @@ namespace Sample
                 foreach (var employee in employees)
                 {
                     dict.Add(employee.Id, employee.Name);
-                    Console.WriteLine($"Employee {employee.Id} -> {employee.Name}");
+                    Console.WriteLine($"Employee {employee.Id} -> {employee.Name} pwd {employee.Password} card {employee.Card} fp {employee.EnrolledFingerprints}");
                 }
                 var records = await device.DownloadRecords(false); //true to get only new records
                 foreach (var rec in records)
