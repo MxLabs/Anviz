@@ -142,6 +142,11 @@ namespace Anviz.SDK
             await SendCommand(new ClearNewRecordsCommand(DeviceId));
         }
 
+        public async Task RebootDevice()
+        {
+            await SendCommand(new RebootDeviceCommand(DeviceId));
+        }
+
         public void Dispose()
         {
             DeviceStream.Dispose();
