@@ -1,5 +1,4 @@
-
-<a href="https://www.nuget.org/packages/Anviz.SDK"><img src="https://img.shields.io/nuget/v/anviz.sdk.svg?style=flat"></a>
+<a href="https://www.nuget.org/packages/Anviz.SDK"><img src="https://ci.appveyor.com/api/projects/status/hn2yilm9xl66d2yc?svg=true"></a> <a href="https://www.nuget.org/packages/Anviz.SDK"><img src="https://img.shields.io/nuget/v/anviz.sdk.svg?style=flat"></a>
 
 # Anviz
 
