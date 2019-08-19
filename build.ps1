@@ -1,7 +1,7 @@
 # Script static variables
 $buildDir = $env:APPVEYOR_BUILD_FOLDER
 $buildNumber = $env:APPVEYOR_BUILD_VERSION
-$projectDir = $buildDir + "Anviz.SDK";
+$projectDir = $buildDir + "\Anviz.SDK";
 $projectFile = $projectDir + "\Anviz.SDK.csproj";
 $nugetFile = $projectDir + "\Anviz.SDK." + $buildNumber + ".nupkg";
 
