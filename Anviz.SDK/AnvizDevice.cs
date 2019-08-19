@@ -100,6 +100,11 @@ namespace Anviz.SDK
             return new TcpParameters(response.DATA);
         }
 
+        public async Task SetTCPParameters(TcpParameters value)
+        {
+            await SendCommand(new SetTCPParametersCommand(DeviceId, value));
+        }
+
         public async Task<string> GetDeviceSN()
         {
             var response = await SendCommand(new GetDeviceSNCommand(DeviceId));
