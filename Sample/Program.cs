@@ -7,17 +7,21 @@ namespace Sample
 {
     class Program
     {
-        private const ulong DEVICE_ID = 0;
+        private const ulong DEVICE_ID = 1;
         private const string DEVICE_HOST = "10.0.0.1";
         static async Task Main(string[] args)
         {
-            var manager = new AnvizManager(DEVICE_ID);
+            var manager = new AnvizManager(0);
             using (var device = await manager.Connect(DEVICE_HOST))
             {
                 var id = await device.GetDeviceID();
                 var sn = await device.GetDeviceSN();
                 var type = await device.GetDeviceTypeCode();
                 Console.WriteLine($"Connected to device {type} ID {id} SN {sn}");
+                if(id != DEVICE_ID)
+                {
+                    await device.SetDeviceID(DEVICE_ID);
+                }
                 var now = DateTime.Now;
                 var deviceTime = await device.GetDateTime();
                 Console.WriteLine($"Current device time is {deviceTime.ToShortDateString()} {deviceTime.ToShortTimeString()}");

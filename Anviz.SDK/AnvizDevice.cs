@@ -11,7 +11,7 @@ namespace Anviz.SDK
 {
     public class AnvizDevice : IDisposable
     {
-        private readonly ulong DeviceId;
+        private ulong DeviceId;
 
         private readonly TcpClient DeviceSocket;
         private readonly NetworkStream DeviceStream;
@@ -120,6 +120,15 @@ namespace Anviz.SDK
         {
             var response = await SendCommand(new GetDeviceIDCommand(DeviceId));
             return Bytes.Read(response.DATA);
+        }
+
+        public async Task SetDeviceID(ulong newDeviceId)
+        {
+            await SendCommand(new SetDeviceIDCommand(DeviceId, newDeviceId));
+            if (DeviceId != 0)
+            {
+                DeviceId = newDeviceId;
+            }
         }
 
         public async Task<string> GetDeviceTypeCode()

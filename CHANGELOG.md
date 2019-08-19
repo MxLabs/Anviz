@@ -7,6 +7,7 @@ FEATURES:
 
 * Set device network info
 * Set device SN (only on supported Anviz devices)
+* Set device ID
 
 BUG FIXES:
 
