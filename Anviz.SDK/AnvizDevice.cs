@@ -147,6 +147,11 @@ namespace Anviz.SDK
             await SendCommand(new RebootDeviceCommand(DeviceId));
         }
 
+        public async Task ResetToFactorySettings()
+        {
+            await SendCommand(new ResetToFactorySettingsCommand(DeviceId));
+        }
+
         public void Dispose()
         {
             DeviceStream.Dispose();
