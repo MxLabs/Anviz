@@ -11,7 +11,7 @@ namespace Anviz.SDK.Responses
         public byte RecordType { get; }
         public uint WorkType { get; }
 
-        public Record(byte[] data, int offset)
+        internal Record(byte[] data, int offset)
         {
             UserCode = Bytes.Read(Bytes.Split(data, offset, 5));
             var rawTime = Bytes.Read(Bytes.Split(data, offset + 5, 4));

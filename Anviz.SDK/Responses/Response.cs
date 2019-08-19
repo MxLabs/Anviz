@@ -14,7 +14,7 @@ namespace Anviz.SDK.Responses
 
         public byte[] DATA { get; }
 
-        public Response(byte responseCode, byte[] data)
+        internal Response(byte responseCode, byte[] data)
         {
             var STX = data[0];
             if (STX != 0xA5)
@@ -44,7 +44,7 @@ namespace Anviz.SDK.Responses
             }
         }
 
-        public static async Task<Response> FromStream(byte ResponseCode, NetworkStream stream)
+        internal static async Task<Response> FromStream(byte ResponseCode, NetworkStream stream)
         {
             /*
              * Ethernet MTU is slightly less than 1500

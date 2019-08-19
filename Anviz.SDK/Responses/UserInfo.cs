@@ -17,7 +17,7 @@ namespace Anviz.SDK.Responses
         public byte Keep { get; }
         public byte Message { get; }
 
-        public UserInfo(byte[] data, int offset)
+        internal UserInfo(byte[] data, int offset)
         {
             Id = Bytes.Read(Bytes.Split(data, offset, 5));
             var pwd = Bytes.Split(data, offset + 5, 3);

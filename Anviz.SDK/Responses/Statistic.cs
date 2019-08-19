@@ -11,7 +11,7 @@ namespace Anviz.SDK.Responses
         public uint AllRecordAmount { get; }
         public uint NewRecordAmount { get; }
 
-        public Statistic(byte[] data)
+        internal Statistic(byte[] data)
         {
             UserAmount = (uint)Bytes.Read(Bytes.Split(data, 0, 3));
             FingerPrintAmount = (uint)Bytes.Read(Bytes.Split(data, 3, 3));

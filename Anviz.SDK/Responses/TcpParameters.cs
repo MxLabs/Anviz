@@ -22,7 +22,7 @@ namespace Anviz.SDK.Responses
         public TcpMode TcpMode { get; set; }
         public bool DhcpEnabled { get; set; }
 
-        public TcpParameters(byte[] data)
+        internal TcpParameters(byte[] data)
         {
             IP = new IPAddress(Bytes.Split(data, 0, 4));
             SubnetMask = new IPAddress(Bytes.Split(data, 4, 4));
