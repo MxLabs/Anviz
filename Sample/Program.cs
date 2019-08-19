@@ -21,7 +21,7 @@ namespace Sample
                 var now = DateTime.Now;
                 var deviceTime = await device.GetDateTime();
                 Console.WriteLine($"Current device time is {deviceTime.ToShortDateString()} {deviceTime.ToShortTimeString()}");
-                if ((now - deviceTime).TotalSeconds > 1)
+                if (Math.Abs((now - deviceTime).TotalSeconds) > 1)
                 {
                     await device.SetDateTime(now);
                     Console.WriteLine("Updated device time according to local time");
@@ -34,7 +34,7 @@ namespace Sample
                 {
                     dict.Add(employee.Id, employee.Name);
                     Console.WriteLine($"Employee {employee.Id} -> {employee.Name} pwd {employee.Password} card {employee.Card} fp {string.Join(", ", employee.EnrolledFingerprints)}");
-                    foreach(var f in employee.EnrolledFingerprints)
+                    foreach (var f in employee.EnrolledFingerprints)
                     {
                         var fp = await device.GetFingerprintTemplate(employee.Id, f);
                         Console.WriteLine($"-> {f} {Convert.ToBase64String(fp)}");
