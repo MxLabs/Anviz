@@ -2,7 +2,7 @@
 {
     class GetDeviceSNCommand : Command
     {
-        private const byte GET_DEVICE_SN = 0x46;
+        private const byte GET_DEVICE_SN = 0x24;
         public GetDeviceSNCommand(ulong deviceId) : base(deviceId)
         {
             BuildPayload(GET_DEVICE_SN, new byte[] { });

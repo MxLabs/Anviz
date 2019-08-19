@@ -4,6 +4,7 @@ using Anviz.SDK.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Anviz.SDK
@@ -99,9 +100,15 @@ namespace Anviz.SDK
             return new TcpParameters(response.DATA);
         }
 
-        public async Task<ulong> GetDeviceSN()
+        public async Task<string> GetDeviceSN()
         {
             var response = await SendCommand(new GetDeviceSNCommand(DeviceId));
+            return Encoding.ASCII.GetString(response.DATA);
+        }
+
+        public async Task<ulong> GetDeviceID()
+        {
+            var response = await SendCommand(new GetDeviceIDCommand(DeviceId));
             return Bytes.Read(response.DATA);
         }
 

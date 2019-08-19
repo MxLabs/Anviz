@@ -14,9 +14,10 @@ namespace Sample
             var manager = new AnvizManager(DEVICE_ID);
             using (var device = await manager.Connect(DEVICE_HOST))
             {
+                var id = await device.GetDeviceID();
                 var sn = await device.GetDeviceSN();
                 var type = await device.GetDeviceTypeCode();
-                Console.WriteLine($"Connected to device {type} with SN {sn.ToString()}");
+                Console.WriteLine($"Connected to device {type} ID {id} SN {sn}");
                 var now = DateTime.Now;
                 var deviceTime = await device.GetDateTime();
                 Console.WriteLine($"Current device time is {deviceTime.ToShortDateString()} {deviceTime.ToShortTimeString()}");
