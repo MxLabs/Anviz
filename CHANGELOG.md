@@ -9,6 +9,8 @@ FEATURES:
 * Set device SN (only on supported Anviz devices)
 * Set device ID
 * Reboot device
+* Reset device to Factory Settings
+* Unlock door
 
 BUG FIXES:
 

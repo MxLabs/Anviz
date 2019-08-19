@@ -152,6 +152,11 @@ namespace Anviz.SDK
             await SendCommand(new ResetToFactorySettingsCommand(DeviceId));
         }
 
+        public async Task UnlockDoor()
+        {
+            await SendCommand(new UnlockDoorCommand(DeviceId));
+        }
+
         public void Dispose()
         {
             DeviceStream.Dispose();
