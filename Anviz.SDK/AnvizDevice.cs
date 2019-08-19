@@ -111,6 +111,11 @@ namespace Anviz.SDK
             return Encoding.ASCII.GetString(response.DATA);
         }
 
+        public async Task SetDeviceSN(string value)
+        {
+            await SendCommand(new SetDeviceSNCommand(DeviceId, value));
+        }
+
         public async Task<ulong> GetDeviceID()
         {
             var response = await SendCommand(new GetDeviceIDCommand(DeviceId));

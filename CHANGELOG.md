@@ -6,6 +6,7 @@ BREAKING CHANGES:
 FEATURES:
 
 * Set device network info
+* Set device SN (only on supported Anviz devices)
 
 BUG FIXES:
 
