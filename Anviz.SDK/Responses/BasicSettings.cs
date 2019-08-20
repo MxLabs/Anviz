@@ -1,7 +1,16 @@
 ﻿using Anviz.SDK.Utils;
+using System;
 
 namespace Anviz.SDK.Responses
 {
+    [Flags]
+    public enum DateFormat
+    {
+        YYMMDD = 8,
+        MMDDYY = 16,
+        DDMMYY = 32,
+    }
+
     public class BasicSettings
     {
         public string Firmware { get; set; }
@@ -9,7 +18,8 @@ namespace Anviz.SDK.Responses
         public byte Sleep { get; set; }
         public byte Volume { get; set; }
         public byte Language { get; set; }
-        public byte DateTimeFormat { get; set; }
+        public DateFormat DateFormat { get; set; }
+        public bool Is24HourClock { get; set; }
         public byte Attendance { get; set; }
         public byte LangCHG { get; set; }
         public byte CMDVersion { get; set; }
@@ -21,7 +31,8 @@ namespace Anviz.SDK.Responses
             Sleep = data[11];
             Volume = data[12];
             Language = data[13];
-            DateTimeFormat = data[14];
+            DateFormat = (DateFormat)(data[14] & 0xFE);
+            Is24HourClock = (data[14] & 0x01) == 0;
             Attendance = data[15];
             LangCHG = data[16];
             CMDVersion = data[17];
