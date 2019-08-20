@@ -13,7 +13,7 @@ namespace Anviz.SDK.Responses
 
     public class BasicSettings
     {
-        public string Firmware { get; set; }
+        public string Firmware { get; }
         public ulong ManagementPassword { get; set; }
         public byte Sleep { get; set; }
         public byte Volume { get; set; }
@@ -22,7 +22,7 @@ namespace Anviz.SDK.Responses
         public bool Is24HourClock { get; set; }
         public byte Attendance { get; set; }
         public byte LangCHG { get; set; }
-        public byte CMDVersion { get; set; }
+        public byte CMDVersion { get; }
 
         internal BasicSettings(byte[] data)
         {
@@ -36,6 +36,20 @@ namespace Anviz.SDK.Responses
             Attendance = data[15];
             LangCHG = data[16];
             CMDVersion = data[17];
+        }
+
+        internal byte[] ToArray()
+        {
+            var ret = new byte[10];
+            Bytes.PasswordWrite(ManagementPassword).CopyTo(ret, 0);
+            ret[3] = Sleep;
+            ret[4] = Volume;
+            ret[5] = Language;
+            ret[6] = (byte)(DateFormat + (Is24HourClock ? 0 : 1));
+            ret[7] = Attendance;
+            ret[8] = LangCHG;
+            ret[9] = 0; //reserved
+            return ret;
         }
     }
 }

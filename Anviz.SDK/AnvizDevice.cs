@@ -162,6 +162,11 @@ namespace Anviz.SDK
             return new BasicSettings(response.DATA);
         }
 
+        public async Task SetBasicSettings(BasicSettings value)
+        {
+            await SendCommand(new SetBasicSettingsCommand(DeviceId, value));
+        }
+
         public void Dispose()
         {
             DeviceStream.Dispose();
