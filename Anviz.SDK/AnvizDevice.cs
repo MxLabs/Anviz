@@ -4,7 +4,6 @@ using Anviz.SDK.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Anviz.SDK
@@ -108,7 +107,7 @@ namespace Anviz.SDK
         public async Task<string> GetDeviceSN()
         {
             var response = await SendCommand(new GetDeviceSNCommand(DeviceId));
-            return Encoding.ASCII.GetString(response.DATA);
+            return Bytes.GetAsciiString(response.DATA);
         }
 
         public async Task SetDeviceSN(string value)
