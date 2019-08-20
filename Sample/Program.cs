@@ -39,7 +39,7 @@ namespace Sample
                 var basic = await device.GetBasicSettings();
                 Console.WriteLine($"FW {basic.Firmware} AdminPWD {basic.ManagementPassword} Vol {basic.Volume} DateFormat {basic.DateFormat} 24h {basic.Is24HourClock}");
 #if false //here you can change basic parameters
-                basic.Volume = 0;
+                basic.Volume = Anviz.SDK.Responses.Volume.Off;
                 basic.DateFormat = Anviz.SDK.Responses.DateFormat.DDMMYY;
                 basic.Is24HourClock = true;
                 await device.SetBasicSettings(basic);

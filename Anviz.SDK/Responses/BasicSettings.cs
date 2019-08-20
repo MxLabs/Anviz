@@ -11,12 +11,22 @@ namespace Anviz.SDK.Responses
         DDMMYY = 32,
     }
 
+    public enum Volume
+    {
+        Off,
+        Lowest,
+        Low,
+        Medium,
+        High,
+        Maximum
+    }
+
     public class BasicSettings
     {
         public string Firmware { get; }
         public ulong ManagementPassword { get; set; }
         public byte Sleep { get; set; }
-        public byte Volume { get; set; }
+        public Volume Volume { get; set; }
         public byte Language { get; set; }
         public DateFormat DateFormat { get; set; }
         public bool Is24HourClock { get; set; }
@@ -29,7 +39,7 @@ namespace Anviz.SDK.Responses
             Firmware = Bytes.GetAsciiString(Bytes.Split(data, 0, 8));
             ManagementPassword = Bytes.PasswordRead(Bytes.Split(data, 8, 3));
             Sleep = data[11];
-            Volume = data[12];
+            Volume = (Volume)data[12];
             Language = data[13];
             DateFormat = (DateFormat)(data[14] & 0xFE);
             Is24HourClock = (data[14] & 0x01) == 0;
@@ -43,7 +53,7 @@ namespace Anviz.SDK.Responses
             var ret = new byte[10];
             Bytes.PasswordWrite(ManagementPassword).CopyTo(ret, 0);
             ret[3] = Sleep;
-            ret[4] = Volume;
+            ret[4] = (byte)Volume;
             ret[5] = Language;
             ret[6] = (byte)(DateFormat + (Is24HourClock ? 0 : 1));
             ret[7] = Attendance;
