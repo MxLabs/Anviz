@@ -56,9 +56,9 @@ namespace Anviz.SDK
             while (recordAmount > 0)
             {
                 var response = await SendCommand(new GetRecordsCommand(DeviceId, isFirst, onlyNew, recordAmount));
-                uint counter = response.DATA[0];
+                var counter = response.DATA[0];
                 recordAmount -= counter;
-                for (int i = 0; i < counter; i++)
+                for (var i = 0; i < counter; i++)
                 {
                     records.Add(new Record(response.DATA, i * 14 + 1));
                 }
@@ -76,9 +76,9 @@ namespace Anviz.SDK
             while (userAmount > 0)
             {
                 var response = await SendCommand(new GetStaffDataCommand(DeviceId, isFirst, userAmount));
-                uint counter = response.DATA[0];
+                var counter = response.DATA[0];
                 userAmount -= counter;
-                for (int i = 0; i < counter; i++)
+                for (var i = 0; i < counter; i++)
                 {
                     users.Add(new UserInfo(response.DATA, i * 40 + 1));
                 }

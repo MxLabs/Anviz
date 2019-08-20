@@ -9,7 +9,7 @@ namespace Anviz.SDK.Responses
         public DateTime DateTime { get; }
         public byte BackupCode { get; }
         public byte RecordType { get; }
-        public uint WorkType { get; }
+        public ulong WorkType { get; }
 
         internal Record(byte[] data, int offset)
         {
@@ -18,7 +18,7 @@ namespace Anviz.SDK.Responses
             DateTime = DateConversions.RecordToDateTime(rawTime);
             BackupCode = data[offset + 9];
             RecordType = data[offset + 10];
-            WorkType = (uint)Bytes.Read(Bytes.Split(data, offset + 11, 3));
+            WorkType = Bytes.Read(Bytes.Split(data, offset + 11, 3));
         }
 
         public override string ToString()
