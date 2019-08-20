@@ -33,6 +33,31 @@ namespace Anviz.SDK.Utils
             return ret.ToArray();
         }
 
+        public static ulong PasswordRead(byte[] pwd)
+        {
+            var ret = (ulong)(pwd[0] & 0x0F); //first 4 bits are pwdlen
+            ret = (ret << 8) | pwd[1];
+            ret = (ret << 8) | pwd[2];
+            return ret;
+        }
+
+        public static byte[] PasswordWrite(ulong? pwd)
+        {
+            if (!pwd.HasValue)
+            {
+                return new byte[] { 0xFF, 0xFF, 0xFF };
+            }
+            var pwdlen = (byte)pwd.ToString().Length;
+            var ret = new byte[3];
+            ret[2] = (byte)(pwd % 256);
+            pwd >>= 8;
+            ret[1] = (byte)(pwd % 256);
+            pwd >>= 8;
+            ret[0] = (byte)(pwdlen << 4);
+            ret[0] |= (byte)((pwd % 256) & 0x0F);
+            return ret;
+        }
+
         public static byte[] Split(byte[] data, int start, int count)
         {
             return data.Skip(start).Take(count).ToArray();

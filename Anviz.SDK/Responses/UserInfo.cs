@@ -27,9 +27,7 @@ namespace Anviz.SDK.Responses
             }
             else
             {
-                Password = (ulong)(pwd[0] & 0x0F); //first 4 bytes are pwdlen
-                Password = (Password << 8) | pwd[1];
-                Password = (Password << 8) | pwd[2];
+                Password = Bytes.PasswordRead(pwd);
             }
             var card = Bytes.Split(data, offset + 8, 4);
             if (card[0] == 0xFF && card[1] == 0xFF && card[2] == 0xFF && card[3] == 0xFF)

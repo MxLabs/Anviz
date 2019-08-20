@@ -5,7 +5,7 @@ namespace Anviz.SDK.Responses
     public class BasicSettings
     {
         public string Firmware { get; set; }
-        public byte[] PWD { get; set; }
+        public ulong ManagementPassword { get; set; }
         public byte Sleep { get; set; }
         public byte Volume { get; set; }
         public byte Language { get; set; }
@@ -17,7 +17,7 @@ namespace Anviz.SDK.Responses
         internal BasicSettings(byte[] data)
         {
             Firmware = Bytes.GetAsciiString(Bytes.Split(data, 0, 8));
-            PWD = Bytes.Split(data, 8, 3);
+            ManagementPassword = Bytes.PasswordRead(Bytes.Split(data, 8, 3));
             Sleep = data[11];
             Volume = data[12];
             Language = data[13];
