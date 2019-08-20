@@ -11,6 +11,7 @@ FEATURES:
 * Reboot device
 * Reset device to Factory Settings
 * Unlock door
+* Get basic settings
 
 BUG FIXES:
 

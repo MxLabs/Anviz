@@ -157,6 +157,12 @@ namespace Anviz.SDK
             await SendCommand(new UnlockDoorCommand(DeviceId));
         }
 
+        public async Task<BasicSettings> GetBasicSettings()
+        {
+            var response = await SendCommand(new GetBasicSettingsCommand(DeviceId));
+            return new BasicSettings(response.DATA);
+        }
+
         public void Dispose()
         {
             DeviceStream.Dispose();

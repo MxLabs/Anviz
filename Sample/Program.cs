@@ -36,6 +36,8 @@ namespace Sample
                 net.DefaultGateway = IPAddress.Parse("10.0.0.5");
                 await device.SetTCPParameters(net);
 #endif
+                var basic = await device.GetBasicSettings();
+                Console.WriteLine($"FW {basic.Firmware}");
                 var employees = await device.GetEmployeesData();
                 var dict = new Dictionary<ulong, string>();
                 foreach (var employee in employees)
