@@ -46,6 +46,11 @@ namespace Sample
 #endif
                 var advanced = await device.GetAdvancedSettings();
                 Console.WriteLine($"FPPrecision {advanced.FPPrecision} Delay {advanced.RepeatAttendanceDelay}");
+#if false //here you can change advanced parameters
+                advanced.FPPrecision = Anviz.SDK.Responses.FPPrecision.Medium;
+                advanced.RepeatAttendanceDelay = 1;
+                await device.SetAdvancedSettings(advanced);
+#endif
                 var employees = await device.GetEmployeesData();
                 var dict = new Dictionary<ulong, string>();
                 foreach (var employee in employees)

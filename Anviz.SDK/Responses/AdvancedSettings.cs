@@ -41,5 +41,24 @@ namespace Anviz.SDK.Responses
             ScheduledBellDelay = data[13];
             Reserved = data[14];
         }
+
+        internal byte[] ToArray()
+        {
+            var ret = new byte[15];
+            ret[0] = (byte)FPPrecision;
+            ret[1] = WiegandHead;
+            ret[2] = WiegandMode;
+            ret[3] = (byte)(WorkCode?1:0);
+            ret[4] = (byte)(RealTimeMode ? 1 : 0);
+            ret[5] = (byte)(FPAutoUpdate ? 1 : 0);
+            ret[6] = RelayMode;
+            ret[7] = LockDelay;
+            Bytes.Write(3, MemoryFullAlarm).CopyTo(ret, 8);
+            ret[11] = RepeatAttendanceDelay;
+            ret[12] = DoorSensorDelay;
+            ret[13] = ScheduledBellDelay;
+            ret[14] = Reserved;
+            return ret;
+        }
     }
 }
