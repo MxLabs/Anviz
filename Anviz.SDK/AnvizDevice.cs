@@ -167,6 +167,12 @@ namespace Anviz.SDK
             await SendCommand(new SetBasicSettingsCommand(DeviceId, value));
         }
 
+        public async Task<AdvancedSettings> GetAdvancedSettings()
+        {
+            var response = await SendCommand(new GetAdvancedSettingsCommand(DeviceId));
+            return new AdvancedSettings(response.DATA);
+        }
+
         public void Dispose()
         {
             DeviceStream.Dispose();

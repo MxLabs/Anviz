@@ -44,6 +44,8 @@ namespace Sample
                 basic.Is24HourClock = true;
                 await device.SetBasicSettings(basic);
 #endif
+                var advanced = await device.GetAdvancedSettings();
+                Console.WriteLine($"FPPrecision {advanced.FPPrecision} Delay {advanced.RepeatAttendanceDelay}");
                 var employees = await device.GetEmployeesData();
                 var dict = new Dictionary<ulong, string>();
                 foreach (var employee in employees)
