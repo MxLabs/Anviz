@@ -72,6 +72,21 @@ namespace Anviz.SDK
             await SendCommand(new SetRecordsCommand(DeviceId, record));
         }
 
+        public async Task ClearNewRecords()
+        {
+            await SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.CLEAR_ALL, 0));
+        }
+
+        public async Task ClearNewRecords(ulong amount)
+        {
+            await SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.CLEAR_AMOUNT, amount));
+        }
+
+        public async Task DeleteAllRecords()
+        {
+            await SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.DELETE_ALL, 0));
+        }
+
         public async Task<List<UserInfo>> GetEmployeesData()
         {
             var statistics = await GetDownloadInformation();
@@ -174,11 +189,6 @@ namespace Anviz.SDK
         {
             var response = await SendCommand(new GetDeviceTypeCommand(DeviceId));
             return Bytes.GetAsciiString(response.DATA);
-        }
-
-        public async Task ClearNewRecords()
-        {
-            await SendCommand(new ClearNewRecordsCommand(DeviceId));
         }
 
         public async Task RebootDevice()

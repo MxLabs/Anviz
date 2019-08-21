@@ -74,11 +74,12 @@ namespace Sample
                     var fp = await device.EnrollFingerprint(employee.Id);
                     await device.SetFingerprintTemplate(employee.Id, Anviz.SDK.Utils.Finger.RightIndex, fp);
                 }
-                var records = await device.DownloadRecords(false); //true to get only new records
+                var records = await device.DownloadRecords(true); //true to get only new records
                 foreach (var rec in records)
                 {
                     Console.WriteLine($"Employee {dict[rec.UserCode]} at {rec.DateTime.ToLongDateString()} {rec.DateTime.ToLongTimeString()}");
                 }
+                await device.ClearNewRecords();
             }
             Console.ReadLine();
         }
