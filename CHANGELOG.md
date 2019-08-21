@@ -13,7 +13,7 @@ FEATURES:
 * Unlock door
 * Get/set basic settings
 * Get/set advanced settings
-* Set staff data
+* Set/delete staff data
 
 BUG FIXES:
 

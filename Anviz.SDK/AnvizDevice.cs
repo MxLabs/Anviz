@@ -100,6 +100,16 @@ namespace Anviz.SDK
             }
         }
 
+        public async Task DeleteEmployeesData(UserInfo user)
+        {
+            await DeleteEmployeesData(user.Id);
+        }
+
+        public async Task DeleteEmployeesData(ulong employeeID)
+        {
+            await SendCommand(new DeleteStaffDataCommand(DeviceId, employeeID));
+        }
+
         public async Task<byte[]> GetFingerprintTemplate(ulong employeeID, Finger finger)
         {
             var response = await SendCommand(new GetFingerprintTemplateCommand(DeviceId, employeeID, finger));
