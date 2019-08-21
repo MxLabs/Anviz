@@ -67,6 +67,11 @@ namespace Anviz.SDK
             return records;
         }
 
+        public async Task SetRecords(Record record)
+        {
+            await SendCommand(new SetRecordsCommand(DeviceId, record));
+        }
+
         public async Task<List<UserInfo>> GetEmployeesData()
         {
             var statistics = await GetDownloadInformation();

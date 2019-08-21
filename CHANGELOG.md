@@ -16,6 +16,7 @@ FEATURES:
 * Set/delete staff data
 * Set fingerprint template
 * Enroll fingerprint interactively
+* Upload records
 
 BUG FIXES:
 

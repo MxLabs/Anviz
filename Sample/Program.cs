@@ -64,6 +64,7 @@ namespace Sample
                         var fp = await device.GetFingerprintTemplate(employee.Id, f);
                         Console.WriteLine($"-> {f} {Convert.ToBase64String(fp)}");
                     }
+                    await device.SetRecords(new Anviz.SDK.Responses.Record(employee.Id));
                 }
                 if (!dict.ContainsValue("TEST"))
                 {
