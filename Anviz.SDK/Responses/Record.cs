@@ -5,6 +5,9 @@ namespace Anviz.SDK.Responses
 {
     public class Record
     {
+        internal const int RECORD_LENGTH = 14;
+        internal const int MAX_RECORDS = 25;
+
         public ulong UserCode { get; }
         public DateTime DateTime { get; }
         public byte BackupCode { get; }

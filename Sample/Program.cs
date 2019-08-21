@@ -18,7 +18,7 @@ namespace Sample
                 var sn = await device.GetDeviceSN();
                 var type = await device.GetDeviceTypeCode();
                 Console.WriteLine($"Connected to device {type} ID {id} SN {sn}");
-                if(id != DEVICE_ID)
+                if (id != DEVICE_ID)
                 {
                     await device.SetDeviceID(DEVICE_ID);
                 }
@@ -51,6 +51,8 @@ namespace Sample
                 advanced.RepeatAttendanceDelay = 1;
                 await device.SetAdvancedSettings(advanced);
 #endif
+                var stats = await device.GetDownloadInformation();
+                Console.WriteLine($"TotalUsers {stats.UserAmount} TotalRecords {stats.AllRecordAmount}");
                 var employees = await device.GetEmployeesData();
                 var dict = new Dictionary<ulong, string>();
                 foreach (var employee in employees)
@@ -62,6 +64,12 @@ namespace Sample
                         var fp = await device.GetFingerprintTemplate(employee.Id, f);
                         Console.WriteLine($"-> {f} {Convert.ToBase64String(fp)}");
                     }
+                }
+                if (!dict.ContainsValue("TEST"))
+                {
+                    var employee = new Anviz.SDK.Responses.UserInfo(stats.UserAmount + 1, "TEST");
+                    await device.SetEmployeesData(employee);
+                    Console.WriteLine("Created test user");
                 }
                 var records = await device.DownloadRecords(false); //true to get only new records
                 foreach (var rec in records)

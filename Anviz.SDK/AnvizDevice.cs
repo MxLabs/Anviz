@@ -60,7 +60,7 @@ namespace Anviz.SDK
                 recordAmount -= counter;
                 for (var i = 0; i < counter; i++)
                 {
-                    records.Add(new Record(response.DATA, i * 14 + 1));
+                    records.Add(new Record(response.DATA, 1 + i * Record.RECORD_LENGTH));
                 }
                 isFirst = false;
             }
@@ -80,11 +80,24 @@ namespace Anviz.SDK
                 userAmount -= counter;
                 for (var i = 0; i < counter; i++)
                 {
-                    users.Add(new UserInfo(response.DATA, i * 40 + 1));
+                    users.Add(new UserInfo(response.DATA, 1 + i * UserInfo.RECORD_LENGTH));
                 }
                 isFirst = false;
             }
             return users;
+        }
+
+        public async Task SetEmployeesData(UserInfo user)
+        {
+            await SetEmployeesData(new List<UserInfo> { user });
+        }
+
+        public async Task SetEmployeesData(List<UserInfo> users)
+        {
+            while (users.Count > 0)
+            {
+                await SendCommand(new SetStaffDataCommand(DeviceId, users));
+            }
         }
 
         public async Task<byte[]> GetFingerprintTemplate(ulong employeeID, Finger finger)

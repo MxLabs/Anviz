@@ -1,21 +1,25 @@
 ﻿using Anviz.SDK.Utils;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Anviz.SDK.Responses
 {
     public class UserInfo
     {
-        public ulong Id { get; }
-        public ulong? Password { get; }
-        public ulong? Card { get; }
-        public string Name { get; }
+        internal const int RECORD_LENGTH = 40;
+        internal const int MAX_RECORDS = 8;
+
+        public ulong Id { get; set; }
+        public ulong? Password { get; set; }
+        public ulong? Card { get; set; }
+        public string Name { get; set; }
         public List<Finger> EnrolledFingerprints { get; }
-        public byte Department { get; }
-        public byte Group { get; }
-        public byte Mode { get; }
-        public byte PWDH8 { get; }
-        public byte Keep { get; }
-        public byte Message { get; }
+        public byte Department { get; set; }
+        public byte Group { get; set; }
+        public byte Mode { get; set; }
+        public byte PWDH8 { get; set; }
+        public byte Keep { get; set; }
+        public byte Message { get; set; }
 
         internal UserInfo(byte[] data, int offset)
         {
@@ -46,6 +50,45 @@ namespace Anviz.SDK.Responses
             PWDH8 = data[offset + 37];
             Keep = data[offset + 38];
             Message = data[offset + 39];
+        }
+
+        internal byte[] ToArray()
+        {
+            var ret = new byte[RECORD_LENGTH];
+            Bytes.Write(5, Id).CopyTo(ret, 0);
+            Bytes.PasswordWrite(Password).CopyTo(ret, 5);
+            if (Card.HasValue)
+            {
+                Bytes.Write(4, Card.Value).CopyTo(ret, 8);
+            }
+            else
+            {
+                ret[8] = 0xFF;
+                ret[9] = 0xFF;
+                ret[10] = 0xFF;
+                ret[11] = 0xFF;
+            }
+            Encoding.BigEndianUnicode.GetBytes(Name).CopyTo(ret, 12);
+            ret[32] = Department;
+            ret[33] = Group;
+            ret[34] = Mode;
+            ret[37] = PWDH8;
+            ret[38] = Keep;
+            ret[39] = Message;
+            return ret;
+        }
+
+        public UserInfo(ulong id, string name)
+        {
+            Id = id;
+            Name = name;
+            Department = 1;
+            Group = 1;
+            Mode = 6;
+            EnrolledFingerprints = new List<Finger>();
+            PWDH8 = 0xFF;
+            Keep = 0xFF;
+            Message = 0x40;
         }
 
         public override string ToString()
