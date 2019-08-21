@@ -1,6 +1,7 @@
 ## UNRELEASED
 BREAKING CHANGES:
 
+* `AnvizManager` doesn't need DeviceID anymore since it's requested to the connected device automatically
 * `TcpParameters` class now implements `IPAddress` for IP fields and `PhysicalAddress` for MAC
 
 FEATURES:

@@ -11,7 +11,7 @@ namespace Sample
         private const string DEVICE_HOST = "10.0.0.1";
         static async Task Main(string[] args)
         {
-            var manager = new AnvizManager(0);
+            var manager = new AnvizManager();
             using (var device = await manager.Connect(DEVICE_HOST))
             {
                 var id = await device.GetDeviceID();
