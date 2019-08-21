@@ -34,7 +34,7 @@
         public static ushort Compute(byte[] data, int lenght)
         {
             ushort crc = 0xFFFF;
-            for (int i = 0; i < lenght; i++)
+            for (var i = 0; i < lenght; i++)
             {
                 var temp = (ushort)(crc ^ data[i]);
                 crc = (ushort)((crc >> 8) ^ CRCTABLE[temp & 0x00FF]);

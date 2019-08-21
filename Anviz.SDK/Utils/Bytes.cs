@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 
 namespace Anviz.SDK.Utils
@@ -19,18 +18,13 @@ namespace Anviz.SDK.Utils
 
         public static byte[] Write(int length, ulong value)
         {
-            var ret = new List<byte>();
+            var ret = new byte[length];
             while (value > 0)
             {
-                ret.Add((byte)(value % 256));
+                ret[--length] = (byte)(value % 256);
                 value >>= 8;
             }
-            while (length != ret.Count)
-            {
-                ret.Add(0);
-            }
-            ret.Reverse();
-            return ret.ToArray();
+            return ret;
         }
 
         public static ulong PasswordRead(byte[] pwd)
