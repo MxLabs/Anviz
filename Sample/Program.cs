@@ -69,7 +69,9 @@ namespace Sample
                 {
                     var employee = new Anviz.SDK.Responses.UserInfo(stats.UserAmount + 1, "TEST");
                     await device.SetEmployeesData(employee);
-                    Console.WriteLine("Created test user");
+                    Console.WriteLine("Created test user, begin fp enroll");
+                    var fp = await device.EnrollFingerprint(employee.Id);
+                    await device.SetFingerprintTemplate(employee.Id, Anviz.SDK.Utils.Finger.RightIndex, fp);
                 }
                 var records = await device.DownloadRecords(false); //true to get only new records
                 foreach (var rec in records)

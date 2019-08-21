@@ -15,6 +15,7 @@ FEATURES:
 * Get/set advanced settings
 * Set/delete staff data
 * Set fingerprint template
+* Enroll fingerprint interactively
 
 BUG FIXES:
 
