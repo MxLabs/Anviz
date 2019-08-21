@@ -7,8 +7,17 @@ namespace Anviz.SDK.Responses
 {
     class Response
     {
-        private const byte RET_SUCCESS = 0x00;
-        private const byte RET_FAIL = 0x01;
+        enum RetVal
+        {
+            SUCCESS = 0x00, // operation successful
+            FAIL = 0x01, // operation failed
+            FULL = 0x04, // user full
+            EMPTY = 0x05, // user empty
+            NO_USER = 0x06, // user not exist
+            TIME_OUT = 0x08, // capture timeout
+            USER_OCCUPIED = 0x0A, // user already exists
+            FINGER_OCCUPIED = 0x0B, // fingerprint already exists
+        }
 
         public ulong DeviceID { get; }
 
@@ -28,17 +37,17 @@ namespace Anviz.SDK.Responses
             {
                 throw new Exception("Invalid ACK");
             }
-            var RET = data[6];
-            if (RET != RET_SUCCESS)
+            var RET = (RetVal)data[6];
+            if (RET != RetVal.SUCCESS)
             {
-                throw new Exception("Invalid RET");
+                throw new Exception("RET: " + RET.ToString());
             }
             var LEN = (int)Bytes.Read(Bytes.Split(data, 7, 2));
             DATA = Bytes.Split(data, 9, LEN);
             var CRC = Bytes.Split(data, LEN + 9, 2);
             var ComputedCRC = (CRC[1] << 8) + CRC[0];
             var ExpectedCRC = CRC16.Compute(data, LEN + 9);
-            if(ComputedCRC != ExpectedCRC)
+            if (ComputedCRC != ExpectedCRC)
             {
                 throw new Exception("Invalid CRC");
             }
