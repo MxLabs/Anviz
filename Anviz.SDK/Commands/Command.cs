@@ -21,7 +21,7 @@ namespace Anviz.SDK.Commands
         {
             ResponseCode = (byte)(command + 0x80);
             var dataLength = (ushort)data.Length;
-            if(dataLength > 400)
+            if (dataLength > 400)
             {
                 throw new Exception("Payload too big");
             }

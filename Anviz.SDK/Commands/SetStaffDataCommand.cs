@@ -10,9 +10,9 @@ namespace Anviz.SDK.Commands
         public SetStaffDataCommand(ulong deviceId, List<UserInfo> users) : base(deviceId)
         {
             var userAmount = (byte)Math.Min(users.Count, UserInfo.MAX_RECORDS);
-            var payload = new byte[1+userAmount*UserInfo.RECORD_LENGTH];
+            var payload = new byte[1 + userAmount * UserInfo.RECORD_LENGTH];
             payload[0] = userAmount;
-            for(var i = 0; i < userAmount; i++)
+            for (var i = 0; i < userAmount; i++)
             {
                 users[i].ToArray().CopyTo(payload, 1 + i * UserInfo.RECORD_LENGTH);
             }

@@ -48,7 +48,7 @@ namespace Anviz.SDK.Responses
             ret[0] = (byte)FPPrecision;
             ret[1] = WiegandHead;
             ret[2] = WiegandMode;
-            ret[3] = (byte)(WorkCode?1:0);
+            ret[3] = (byte)(WorkCode ? 1 : 0);
             ret[4] = (byte)(RealTimeMode ? 1 : 0);
             ret[5] = (byte)(FPAutoUpdate ? 1 : 0);
             ret[6] = RelayMode;
