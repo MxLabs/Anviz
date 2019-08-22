@@ -12,7 +12,13 @@ namespace Sample
         static async Task Main(string[] args)
         {
             var manager = new AnvizManager();
+#if true //false for client mode
+            manager.Listen();
+            Console.WriteLine($"Listening on port 5010");
+            using (var device = await manager.Accept())
+#else
             using (var device = await manager.Connect(DEVICE_HOST))
+#endif
             {
                 var id = await device.GetDeviceID();
                 var sn = await device.GetDeviceSN();

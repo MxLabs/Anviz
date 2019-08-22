@@ -18,6 +18,7 @@ FEATURES:
 * Set fingerprint template
 * Enroll fingerprint interactively
 * Upload/delete records
+* Server mode support
 
 BUG FIXES:
 
