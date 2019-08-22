@@ -8,8 +8,7 @@ namespace Anviz.SDK.Commands
         public GetFingerprintTemplateCommand(ulong deviceId, ulong employeeID, Finger finger) : base(deviceId)
         {
             var payload = new byte[6];
-            var employee = Bytes.Write(5, employeeID);
-            employee.CopyTo(payload, 0);
+            Bytes.Write(5, employeeID).CopyTo(payload, 0);
             payload[5] = (byte)(finger + 1);
             BuildPayload(GET_FPTEMPLATE, payload);
         }

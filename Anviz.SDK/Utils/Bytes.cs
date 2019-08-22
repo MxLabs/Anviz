@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 
 namespace Anviz.SDK.Utils
@@ -19,18 +18,38 @@ namespace Anviz.SDK.Utils
 
         public static byte[] Write(int length, ulong value)
         {
-            var ret = new List<byte>();
+            var ret = new byte[length];
             while (value > 0)
             {
-                ret.Add((byte)(value % 256));
+                ret[--length] = (byte)(value % 256);
                 value >>= 8;
             }
-            while (length != ret.Count)
+            return ret;
+        }
+
+        public static ulong PasswordRead(byte[] pwd)
+        {
+            var ret = (ulong)(pwd[0] & 0x0F); //first 4 bits are pwdlen
+            ret = (ret << 8) | pwd[1];
+            ret = (ret << 8) | pwd[2];
+            return ret;
+        }
+
+        public static byte[] PasswordWrite(ulong? pwd)
+        {
+            if (!pwd.HasValue)
             {
-                ret.Add(0);
+                return new byte[] { 0xFF, 0xFF, 0xFF };
             }
-            ret.Reverse();
-            return ret.ToArray();
+            var pwdlen = (byte)pwd.ToString().Length;
+            var ret = new byte[3];
+            ret[2] = (byte)(pwd % 256);
+            pwd >>= 8;
+            ret[1] = (byte)(pwd % 256);
+            pwd >>= 8;
+            ret[0] = (byte)(pwdlen << 4);
+            ret[0] |= (byte)((pwd % 256) & 0x0F);
+            return ret;
         }
 
         public static byte[] Split(byte[] data, int start, int count)

@@ -4,17 +4,35 @@
 
 .NET library to access and control Anviz devices.
 
-Features
---------
+Features 
+----------------
 
- - Device Statistics
- - Download All Records
- - Get All Users
- - Get TCP/IP Parameters
- - Get Device SN
- - Get Device Type Code
- - Clear new records sign 
-
+- [x] Clear records
+- [x] Delete the designated user data
+- [x] Enroll user fingerprint 
+- [x] Get advanced device information
+- [x] Get basic device information
+- [x] Get the date and time 
+- [x] Get device S/N
+- [x] Get device ID
+- [x] Get device type information
+- [x] Download fingerprint template
+- [x] Get record information
+- [x] Download records
+- [x] Download employees data
+- [x] Get TCP/IP parameters
+- [x] Reboot device
+- [x] Recover to factory settings
+- [x] Set advanced settings
+- [x] Set basic settings
+- [x] Set the date and time
+- [x] Set device S/N
+- [x] Set device ID
+- [x] Upload fingerprint template
+- [x] Upload staff information
+- [x] Upload records
+- [x] Set TCP/IP parameters
+- [x] Send signal to open lock without verifying user
 
 Tested devices
 --------

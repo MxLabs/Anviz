@@ -4,21 +4,19 @@ using Anviz.SDK.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Anviz.SDK
 {
     public class AnvizDevice : IDisposable
     {
-        private readonly ulong DeviceId;
+        public ulong DeviceId { get; private set; } = 0;
 
         private readonly TcpClient DeviceSocket;
         private readonly NetworkStream DeviceStream;
 
-        public AnvizDevice(TcpClient socket, ulong deviceId)
+        public AnvizDevice(TcpClient socket)
         {
-            DeviceId = deviceId;
             DeviceSocket = socket;
             DeviceStream = socket.GetStream();
         }
@@ -57,15 +55,35 @@ namespace Anviz.SDK
             while (recordAmount > 0)
             {
                 var response = await SendCommand(new GetRecordsCommand(DeviceId, isFirst, onlyNew, recordAmount));
-                uint counter = response.DATA[0];
+                var counter = response.DATA[0];
                 recordAmount -= counter;
-                for (int i = 0; i < counter; i++)
+                for (var i = 0; i < counter; i++)
                 {
-                    records.Add(new Record(response.DATA, i * 14 + 1));
+                    records.Add(new Record(response.DATA, 1 + i * Record.RECORD_LENGTH));
                 }
                 isFirst = false;
             }
             return records;
+        }
+
+        public async Task SetRecords(Record record)
+        {
+            await SendCommand(new SetRecordsCommand(DeviceId, record));
+        }
+
+        public async Task ClearNewRecords()
+        {
+            await SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.CLEAR_ALL, 0));
+        }
+
+        public async Task ClearNewRecords(ulong amount)
+        {
+            await SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.CLEAR_AMOUNT, amount));
+        }
+
+        public async Task DeleteAllRecords()
+        {
+            await SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.DELETE_ALL, 0));
         }
 
         public async Task<List<UserInfo>> GetEmployeesData()
@@ -77,15 +95,38 @@ namespace Anviz.SDK
             while (userAmount > 0)
             {
                 var response = await SendCommand(new GetStaffDataCommand(DeviceId, isFirst, userAmount));
-                uint counter = response.DATA[0];
+                var counter = response.DATA[0];
                 userAmount -= counter;
-                for (int i = 0; i < counter; i++)
+                for (var i = 0; i < counter; i++)
                 {
-                    users.Add(new UserInfo(response.DATA, i * 40 + 1));
+                    users.Add(new UserInfo(response.DATA, 1 + i * UserInfo.RECORD_LENGTH));
                 }
                 isFirst = false;
             }
             return users;
+        }
+
+        public async Task SetEmployeesData(UserInfo user)
+        {
+            await SetEmployeesData(new List<UserInfo> { user });
+        }
+
+        public async Task SetEmployeesData(List<UserInfo> users)
+        {
+            while (users.Count > 0)
+            {
+                await SendCommand(new SetStaffDataCommand(DeviceId, users));
+            }
+        }
+
+        public async Task DeleteEmployeesData(UserInfo user)
+        {
+            await DeleteEmployeesData(user.Id);
+        }
+
+        public async Task DeleteEmployeesData(ulong employeeID)
+        {
+            await SendCommand(new DeleteStaffDataCommand(DeviceId, employeeID));
         }
 
         public async Task<byte[]> GetFingerprintTemplate(ulong employeeID, Finger finger)
@@ -94,22 +135,54 @@ namespace Anviz.SDK
             return response.DATA;
         }
 
+        public async Task SetFingerprintTemplate(ulong employeeID, Finger finger, byte[] template)
+        {
+            await SendCommand(new SetFingerprintTemplateCommand(DeviceId, employeeID, finger, template));
+        }
+
+        public async Task<byte[]> EnrollFingerprint(ulong employeeID)
+        {
+            await SendCommand(new EnrollFingerprintCommand(DeviceId, employeeID, true));
+            await SendCommand(new EnrollFingerprintCommand(DeviceId, employeeID, false));
+            return await GetFingerprintTemplate(employeeID, 0);
+        }
+
         public async Task<TcpParameters> GetTcpParameters()
         {
             var response = await SendCommand(new GetTCPParametersCommand(DeviceId));
             return new TcpParameters(response.DATA);
         }
 
+        public async Task SetTCPParameters(TcpParameters value)
+        {
+            await SendCommand(new SetTCPParametersCommand(DeviceId, value));
+        }
+
         public async Task<string> GetDeviceSN()
         {
             var response = await SendCommand(new GetDeviceSNCommand(DeviceId));
-            return Encoding.ASCII.GetString(response.DATA);
+            return Bytes.GetAsciiString(response.DATA);
+        }
+
+        public async Task SetDeviceSN(string value)
+        {
+            await SendCommand(new SetDeviceSNCommand(DeviceId, value));
         }
 
         public async Task<ulong> GetDeviceID()
         {
             var response = await SendCommand(new GetDeviceIDCommand(DeviceId));
-            return Bytes.Read(response.DATA);
+            DeviceId = Bytes.Read(response.DATA);
+            return DeviceId;
+        }
+
+        public async Task SetDeviceID(ulong newDeviceId)
+        {
+            await SendCommand(new SetDeviceIDCommand(DeviceId, newDeviceId));
+            if (DeviceId != 0)
+            {
+                DeviceId = newDeviceId;
+            }
         }
 
         public async Task<string> GetDeviceTypeCode()
@@ -118,9 +191,41 @@ namespace Anviz.SDK
             return Bytes.GetAsciiString(response.DATA);
         }
 
-        public async Task ClearNewRecords()
+        public async Task RebootDevice()
         {
-            await SendCommand(new ClearNewRecordsCommand(DeviceId));
+            await SendCommand(new RebootDeviceCommand(DeviceId));
+        }
+
+        public async Task ResetToFactorySettings()
+        {
+            await SendCommand(new ResetToFactorySettingsCommand(DeviceId));
+        }
+
+        public async Task UnlockDoor()
+        {
+            await SendCommand(new UnlockDoorCommand(DeviceId));
+        }
+
+        public async Task<BasicSettings> GetBasicSettings()
+        {
+            var response = await SendCommand(new GetBasicSettingsCommand(DeviceId));
+            return new BasicSettings(response.DATA);
+        }
+
+        public async Task SetBasicSettings(BasicSettings value)
+        {
+            await SendCommand(new SetBasicSettingsCommand(DeviceId, value));
+        }
+
+        public async Task<AdvancedSettings> GetAdvancedSettings()
+        {
+            var response = await SendCommand(new GetAdvancedSettingsCommand(DeviceId));
+            return new AdvancedSettings(response.DATA);
+        }
+
+        public async Task SetAdvancedSettings(AdvancedSettings value)
+        {
+            await SendCommand(new SetAdvancedSettingsCommand(DeviceId, value));
         }
 
         public void Dispose()

@@ -10,6 +10,11 @@ namespace Anviz.SDK.Utils
             return RecordEpoch.AddSeconds(value);
         }
 
+        public static ulong DateTimeToRecord(DateTime value)
+        {
+            return (ulong)(value - RecordEpoch).TotalSeconds;
+        }
+
         public static byte[] DateTimeToByteArray(DateTime dateTime)
         {
             return new byte[] {
