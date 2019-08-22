@@ -1,6 +1,21 @@
 ## UNRELEASED
 BREAKING CHANGES:
 
+FEATURES:
+
+BUG FIXES:
+
+IMPROVEMENTS:
+
+SECURITY:
+
+MISC:
+
+UPGRADE NOTES:
+
+## v2.0.0
+BREAKING CHANGES:
+
 * `AnvizManager` doesn't need DeviceID anymore since it's requested to the connected device automatically
 * `TcpParameters` class now implements `IPAddress` for IP fields and `PhysicalAddress` for MAC
 
@@ -19,13 +34,3 @@ FEATURES:
 * Enroll fingerprint interactively
 * Upload/delete records
 * Server mode support
-
-BUG FIXES:
-
-IMPROVEMENTS:
-
-SECURITY:
-
-MISC:
-
-UPGRADE NOTES:
