@@ -4,8 +4,6 @@
 
 .NET library to access and control Anviz devices.
 
-Features
---------
 Features 
 ----------------
 
