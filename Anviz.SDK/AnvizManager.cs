@@ -34,6 +34,11 @@ namespace Anviz.SDK
             server = null;
         }
 
+        public bool Pending()
+        {
+            return server.Pending();
+        }
+
         public async Task<AnvizDevice> Accept()
         {
             var deviceSocket = await server.AcceptTcpClientAsync();
