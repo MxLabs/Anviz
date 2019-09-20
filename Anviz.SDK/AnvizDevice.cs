@@ -10,6 +10,7 @@ namespace Anviz.SDK
 {
     public class AnvizDevice : IDisposable
     {
+        private const int DEVICE_TIMEOUT = 10000; //10 seconds
         public ulong DeviceId { get; private set; } = 0;
 
         private readonly TcpClient DeviceSocket;
@@ -19,6 +20,10 @@ namespace Anviz.SDK
         {
             DeviceSocket = socket;
             DeviceStream = socket.GetStream();
+            DeviceSocket.ReceiveTimeout = DEVICE_TIMEOUT;
+            DeviceSocket.SendTimeout = DEVICE_TIMEOUT;
+            DeviceStream.WriteTimeout = DEVICE_TIMEOUT;
+            DeviceStream.ReadTimeout = DEVICE_TIMEOUT;
         }
 
         private async Task<Response> SendCommand(Command cmd)
