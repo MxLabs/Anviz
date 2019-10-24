@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Anviz.SDK.Responses
 {
-    class Response
+    public class Response
     {
         enum RetVal
         {
@@ -23,48 +23,69 @@ namespace Anviz.SDK.Responses
 
         public byte[] DATA { get; }
 
-        internal Response(byte responseCode, byte[] data)
+        internal Response(byte[] data, ulong deviceId)
         {
+            DATA = data;
+            DeviceID = deviceId;
+        }
+
+        internal static async Task<Response> FromStream(byte ResponseCode, NetworkStream stream)
+        {
+            var base_offset = 6;
+            var data = new byte[1500];
+            if (await stream.ReadAsync(data, 0, base_offset) != base_offset)
+            {
+                throw new Exception("Partial packet read");
+            }
+
             var STX = data[0];
             if (STX != 0xA5)
             {
                 throw new Exception("Invalid header");
             }
             var CH = Bytes.Split(data, 1, 4);
-            DeviceID = Bytes.Read(CH);
             var ACK = data[5];
-            if (ACK != responseCode)
+            if (ACK < 0x80)
             {
-                throw new Exception("Invalid ACK");
+                if (await stream.ReadAsync(data, base_offset, 2) != 2)
+                {
+                    throw new Exception("Partial packet read");
+                }
+                base_offset += 2;
             }
-            var RET = (RetVal)data[6];
-            if (RET != RetVal.SUCCESS)
+            else
             {
-                throw new Exception("RET: " + RET.ToString());
+                if (ACK != ResponseCode)
+                {
+                    throw new Exception("Invalid ACK");
+                }
+                if (await stream.ReadAsync(data, base_offset, 3) != 3)
+                {
+                    throw new Exception("Partial packet read");
+                }
+                var RET = (RetVal)data[6];
+                if (RET != RetVal.SUCCESS)
+                {
+                    throw new Exception("RET: " + RET.ToString());
+                }
+                base_offset += 3;
             }
             var LEN = (int)Bytes.Read(Bytes.Split(data, 7, 2));
-            DATA = Bytes.Split(data, 9, LEN);
-            var CRC = Bytes.Split(data, LEN + 9, 2);
+            var P_LEN = LEN + 2;
+            if (await stream.ReadAsync(data, base_offset, P_LEN) != P_LEN)
+            {
+                throw new Exception("Partial packet read");
+            }
+
+            var PacketData = Bytes.Split(data, base_offset, LEN);
+            var CRC = Bytes.Split(data, LEN + base_offset, 2);
             var ComputedCRC = (CRC[1] << 8) + CRC[0];
-            var ExpectedCRC = CRC16.Compute(data, LEN + 9);
+            var ExpectedCRC = CRC16.Compute(data, LEN + base_offset);
             if (ComputedCRC != ExpectedCRC)
             {
                 throw new Exception("Invalid CRC");
             }
-        }
-
-        internal static async Task<Response> FromStream(byte ResponseCode, NetworkStream stream)
-        {
-            /*
-             * Ethernet MTU is slightly less than 1500
-             * Since payload maximum size is around 600 bytes,
-             * we can safely assume that we get all data with 1 read.
-             * A better way is done by reading the first 10 bytes,
-             * building the response vars and reading the LEN value
-             */
-            var data = new byte[1500];
-            await stream.ReadAsync(data, 0, data.Length);
-            return new Response(ResponseCode, data);
+            return new Response(PacketData, Bytes.Read(CH));
         }
     }
 }
