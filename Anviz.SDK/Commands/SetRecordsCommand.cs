@@ -1,6 +1,4 @@
 ﻿using Anviz.SDK.Responses;
-using System;
-using System.Collections.Generic;
 
 namespace Anviz.SDK.Commands
 {

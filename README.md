@@ -33,6 +33,8 @@ Features
 - [x] Upload records
 - [x] Set TCP/IP parameters
 - [x] Send signal to open lock without verifying user
+- [x] Receive device pings
+- [x] Read packets asynchronously
 
 Tested devices
 --------
