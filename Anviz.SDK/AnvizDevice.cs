@@ -32,6 +32,12 @@ namespace Anviz.SDK
             return await Response.FromStream(cmd.ResponseCode, DeviceStream);
         }
 
+        public async Task SetConnectionPassword(string user, string password)
+        {
+            var cmd = new SetConnectionPassword(DeviceId,user,password);
+            await SendCommand(cmd);
+        }
+
         public async Task<DateTime> GetDateTime()
         {
             var cmd = new GetDateTimeCommand(DeviceId);

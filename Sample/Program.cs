@@ -12,6 +12,11 @@ namespace Sample
         static async Task Main(string[] args)
         {
             var manager = new AnvizManager();
+#if true //authenticate with device password
+            manager.ConnectionUser = "admin";
+            manager.ConnectionPassword = "12345";
+            manager.AuthenticateConnection = true;
+#endif
 #if true //false for client mode
             manager.Listen();
             Console.WriteLine($"Listening on port 5010");

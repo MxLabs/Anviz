@@ -8,6 +8,10 @@ namespace Anviz.SDK
     {
         private TcpListener server;
 
+        public string ConnectionUser { get; set; } = "admin";
+        public string ConnectionPassword { get; set; } = "12345";
+        public bool AuthenticateConnection { get; set; } = false;
+
         public async Task<AnvizDevice> Connect(string host, int port = 5010)
         {
             var DeviceSocket = new TcpClient();
@@ -48,6 +52,10 @@ namespace Anviz.SDK
         private async Task<AnvizDevice> GetDevice(TcpClient DeviceSocket)
         {
             var device = new AnvizDevice(DeviceSocket);
+            if (AuthenticateConnection)
+            {
+                await device.SetConnectionPassword(ConnectionUser, ConnectionPassword);
+            }
             await device.GetDeviceID();
             return device;
         }
