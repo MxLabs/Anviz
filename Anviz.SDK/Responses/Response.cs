@@ -1,6 +1,7 @@
 ﻿using Anviz.SDK.Utils;
 using System;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Anviz.SDK.Responses
@@ -23,17 +24,20 @@ namespace Anviz.SDK.Responses
 
         public byte[] DATA { get; }
 
-        internal Response(byte[] data, ulong deviceId)
+        public byte ResponseCode { get; }
+
+        internal Response(byte[] data, ulong deviceId, byte ACK)
         {
             DATA = data;
             DeviceID = deviceId;
+            ResponseCode = ACK;
         }
 
-        internal static async Task<Response> FromStream(byte ResponseCode, NetworkStream stream)
+        internal static async Task<Response> FromStream(NetworkStream stream, CancellationToken ct)
         {
             var base_offset = 6;
             var data = new byte[1500];
-            if (await stream.ReadAsync(data, 0, base_offset) != base_offset)
+            if (await stream.ReadAsync(data, 0, base_offset, ct) != base_offset)
             {
                 throw new Exception("Partial packet read");
             }
@@ -47,7 +51,7 @@ namespace Anviz.SDK.Responses
             var ACK = data[5];
             if (ACK < 0x80)
             {
-                if (await stream.ReadAsync(data, base_offset, 2) != 2)
+                if (await stream.ReadAsync(data, base_offset, 2, ct) != 2)
                 {
                     throw new Exception("Partial packet read");
                 }
@@ -55,11 +59,7 @@ namespace Anviz.SDK.Responses
             }
             else
             {
-                if (ACK != ResponseCode)
-                {
-                    throw new Exception("Invalid ACK");
-                }
-                if (await stream.ReadAsync(data, base_offset, 3) != 3)
+                if (await stream.ReadAsync(data, base_offset, 3, ct) != 3)
                 {
                     throw new Exception("Partial packet read");
                 }
@@ -72,7 +72,7 @@ namespace Anviz.SDK.Responses
             }
             var LEN = (int)Bytes.Read(Bytes.Split(data, 7, 2));
             var P_LEN = LEN + 2;
-            if (await stream.ReadAsync(data, base_offset, P_LEN) != P_LEN)
+            if (await stream.ReadAsync(data, base_offset, P_LEN, ct) != P_LEN)
             {
                 throw new Exception("Partial packet read");
             }
@@ -85,7 +85,7 @@ namespace Anviz.SDK.Responses
             {
                 throw new Exception("Invalid CRC");
             }
-            return new Response(PacketData, Bytes.Read(CH));
+            return new Response(PacketData, Bytes.Read(CH), ACK);
         }
     }
 }
