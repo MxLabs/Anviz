@@ -25,6 +25,8 @@ namespace Sample
             using (var device = await manager.Connect(DEVICE_HOST))
 #endif
             {
+                device.DevicePing += (s, e) => Console.WriteLine("Device Ping Received");
+                device.ReceivedPacket += (s, e) => Console.WriteLine("Received packet");
                 var id = await device.GetDeviceID();
                 var sn = await device.GetDeviceSN();
                 var type = await device.GetDeviceTypeCode();

@@ -19,6 +19,8 @@ namespace Anviz.SDK
         private byte ResponseCode = 0;
         private TaskCompletionSource<Response> taskEmitter;
 
+        public event EventHandler<Response> ReceivedPacket;
+
         public AnvizStream(TcpClient socket)
         {
             CancellationTokenSource = new CancellationTokenSource();
@@ -40,11 +42,7 @@ namespace Anviz.SDK
             while (!CancellationTokenSource.IsCancellationRequested)
             {
                 var response = await Response.FromStream(DeviceStream, CancellationTokenSource.Token);
-                if (response.ResponseCode == 0x7F)
-                {
-                    Console.WriteLine("Received ping");
-                }
-                else if (response.ResponseCode == ResponseCode)
+                if (response.ResponseCode == ResponseCode)
                 {
                     ResponseCode = 0;
                     if (taskEmitter != null)
@@ -54,7 +52,7 @@ namespace Anviz.SDK
                 }
                 else
                 {
-                    Console.WriteLine("Received unsolecited packet");
+                    ReceivedPacket?.Invoke(this, response);
                 }
             }
         }

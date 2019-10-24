@@ -13,9 +13,23 @@ namespace Anviz.SDK
         public ulong DeviceId { get; private set; } = 0;
         private readonly AnvizStream DeviceStream;
 
+        public event EventHandler DevicePing;
+        public event EventHandler<Response> ReceivedPacket;
+
         public AnvizDevice(TcpClient socket)
         {
             DeviceStream = new AnvizStream(socket);
+            DeviceStream.ReceivedPacket += (s, e) =>
+            {
+                if (e.ResponseCode == 0x7F)
+                {
+                    DevicePing?.Invoke(this, null);
+                }
+                else
+                {
+                    ReceivedPacket?.Invoke(this, e);
+                }
+            };
         }
 
         public async Task SetConnectionPassword(string user, string password)
