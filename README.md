@@ -41,3 +41,4 @@ Tested devices
 
  - VF Series
  - W1 Pro
+ - P7
