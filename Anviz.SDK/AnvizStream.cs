@@ -24,6 +24,7 @@ namespace Anviz.SDK
         public AnvizStream(TcpClient socket)
         {
             CancellationTokenSource = new CancellationTokenSource();
+            taskEmitter = new TaskCompletionSource<Response>();
             DeviceSocket = socket;
             DeviceStream = socket.GetStream();
             DeviceSocket.ReceiveTimeout = DEVICE_TIMEOUT;
@@ -42,13 +43,16 @@ namespace Anviz.SDK
             while (!CancellationTokenSource.IsCancellationRequested)
             {
                 var response = await Response.FromStream(DeviceStream, CancellationTokenSource.Token);
-                if (response.ResponseCode == ResponseCode)
+                if (response == null)
+                {
+                    DeviceSocket.Close();
+                    taskEmitter.TrySetResult(null);
+                    break;
+                }
+                else if (response.ResponseCode == ResponseCode)
                 {
                     ResponseCode = 0;
-                    if (taskEmitter != null)
-                    {
-                        taskEmitter.TrySetResult(response);
-                    }
+                    taskEmitter.TrySetResult(response);
                 }
                 else
                 {
@@ -59,10 +63,19 @@ namespace Anviz.SDK
 
         public async Task<Response> SendCommand(Command cmd)
         {
+            if (!DeviceSocket.Connected)
+            {
+                throw new Exception("Device is not connected.");
+            }
             ResponseCode = cmd.ResponseCode;
             await cmd.Send(DeviceStream);
             taskEmitter = new TaskCompletionSource<Response>();
-            return await taskEmitter.Task;
+            var result = await taskEmitter.Task;
+            if(result == null)
+            {
+                throw new Exception("Device connection lost.");
+            }
+            return result;
         }
 
         public void Dispose()
