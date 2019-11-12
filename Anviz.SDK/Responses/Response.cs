@@ -37,14 +37,21 @@ namespace Anviz.SDK.Responses
         {
             var base_offset = 6;
             var data = new byte[1500];
-            var amount = await stream.ReadAsync(data, 0, base_offset, ct);
-            if(amount == 0)
+            try
+            {
+                var amount = await stream.ReadAsync(data, 0, base_offset, ct);
+                if (amount == 0)
+                {
+                    return null;
+                }
+                if (amount != base_offset)
+                {
+                    throw new Exception("Partial packet read");
+                }
+            }
+            catch (Exception)
             {
                 return null;
-            }
-            if (amount != base_offset)
-            {
-                throw new Exception("Partial packet read");
             }
 
             var STX = data[0];
