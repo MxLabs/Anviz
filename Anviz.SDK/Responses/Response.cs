@@ -36,7 +36,7 @@ namespace Anviz.SDK.Responses
         internal static async Task<Response> FromStream(NetworkStream stream, CancellationToken ct)
         {
             var base_offset = 6;
-            var data = new byte[1500];
+            var data = new byte[16000]; //for facepass7 template size is 15360
             try
             {
                 var amount = await stream.ReadAsync(data, 0, base_offset, ct);
@@ -84,7 +84,8 @@ namespace Anviz.SDK.Responses
             }
             var LEN = (int)Bytes.Read(Bytes.Split(data, 7, 2));
             var P_LEN = LEN + 2;
-            if (await stream.ReadAsync(data, base_offset, P_LEN, ct) != P_LEN)
+            //data arrave in more of one fragment
+            if (await ReadAsyncContinuously(stream, data, base_offset, P_LEN, ct) != P_LEN)
             {
                 throw new Exception("Partial packet read");
             }
@@ -98,6 +99,18 @@ namespace Anviz.SDK.Responses
                 throw new Exception("Invalid CRC");
             }
             return new Response(PacketData, Bytes.Read(CH), ACK);
+        }
+        //read in more fragment
+        private static async Task<long> ReadAsyncContinuously(NetworkStream stream, byte[] data, int offset, int size, CancellationToken ct)
+        {
+            int readed = 0;
+            do
+            {
+                var amount = await stream.ReadAsync(data, offset + readed, size - readed, ct);
+                readed += amount;
+            } while (readed < size);
+
+            return readed;
         }
     }
 }
