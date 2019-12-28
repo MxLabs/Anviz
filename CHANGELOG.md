@@ -32,5 +32,6 @@ FEATURES:
 * Set/delete staff data
 * Set fingerprint template
 * Enroll fingerprint interactively
+* Set/get facepass template
 * Upload/delete records
 * Server mode support
