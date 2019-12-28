@@ -84,11 +84,8 @@ namespace Anviz.SDK.Responses
             }
             var LEN = (int)Bytes.Read(Bytes.Split(data, 7, 2));
             var P_LEN = LEN + 2;
-            //data arrave in more of one fragment
-            if (await ReadAsyncContinuously(stream, data, base_offset, P_LEN, ct) != P_LEN)
-            {
-                throw new Exception("Partial packet read");
-            }
+
+            await ReadAsyncContinuously(stream, data, base_offset, P_LEN, ct);
 
             var PacketData = Bytes.Split(data, base_offset, LEN);
             var CRC = Bytes.Split(data, LEN + base_offset, 2);
@@ -100,17 +97,19 @@ namespace Anviz.SDK.Responses
             }
             return new Response(PacketData, Bytes.Read(CH), ACK);
         }
-        //read in more fragment
-        private static async Task<long> ReadAsyncContinuously(NetworkStream stream, byte[] data, int offset, int size, CancellationToken ct)
+
+        private static async Task ReadAsyncContinuously(NetworkStream stream, byte[] data, int offset, int size, CancellationToken ct)
         {
             int readed = 0;
             do
             {
                 var amount = await stream.ReadAsync(data, offset + readed, size - readed, ct);
+                if (amount == 0)
+                {
+                    throw new Exception("Partial packet read");
+                }
                 readed += amount;
             } while (readed < size);
-
-            return readed;
         }
     }
 }
