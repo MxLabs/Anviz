@@ -11,6 +11,7 @@ namespace Anviz.SDK
     public class AnvizDevice : IDisposable
     {
         public ulong DeviceId { get; private set; } = 0;
+        public BiometricType DeviceBiometricType { get; private set; } = BiometricType.Unknow;
         private readonly AnvizStream DeviceStream;
 
         public event EventHandler DevicePing;
@@ -216,7 +217,8 @@ namespace Anviz.SDK
         public async Task<BiometricType> GetDeviceBiometricType()
         {
             var response = await DeviceStream.SendCommand(new GetDeviceTypeCommand(DeviceId));
-            return BiometricTypes.DecodeBiometricType(response.DATA);
+            DeviceBiometricType = BiometricTypes.DecodeBiometricType(response.DATA);
+            return DeviceBiometricType; 
         }
 
         public async Task RebootDevice()
