@@ -30,7 +30,8 @@ namespace Sample
                 var id = await device.GetDeviceID();
                 var sn = await device.GetDeviceSN();
                 var type = await device.GetDeviceTypeCode();
-                Console.WriteLine($"Connected to device {type} ID {id} SN {sn}");
+                var biotype = await device.GetDeviceBiometricType();
+                Console.WriteLine($"Connected to device {type} ID {id} SN {sn} BIO {biotype}");
                 if (id != DEVICE_ID)
                 {
                     await device.SetDeviceID(DEVICE_ID);
