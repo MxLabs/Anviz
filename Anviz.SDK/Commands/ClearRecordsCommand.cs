@@ -1,4 +1,6 @@
-﻿using Anviz.SDK.Utils;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Utils;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -14,6 +16,27 @@ namespace Anviz.SDK.Commands
             ret[0] = deleteMode;
             Bytes.Write(3, deleteAmount).CopyTo(ret, 1);
             BuildPayload(DELETE_RECORDS, ret);
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task ClearNewRecords()
+        {
+            await DeviceStream.SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.CLEAR_ALL, 0));
+        }
+
+        public async Task ClearNewRecords(ulong amount)
+        {
+            await DeviceStream.SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.CLEAR_AMOUNT, amount));
+        }
+
+        public async Task DeleteAllRecords()
+        {
+            await DeviceStream.SendCommand(new ClearRecordsCommand(DeviceId, ClearRecordsCommand.DELETE_ALL, 0));
         }
     }
 }

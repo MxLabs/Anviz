@@ -1,6 +1,8 @@
-﻿using Anviz.SDK.Responses;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Responses;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -18,6 +20,25 @@ namespace Anviz.SDK.Commands
             }
             users.RemoveRange(0, userAmount);
             BuildPayload(SET_STAFF_DATA, payload);
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task SetEmployeesData(UserInfo user)
+        {
+            await SetEmployeesData(new List<UserInfo> { user });
+        }
+
+        public async Task SetEmployeesData(List<UserInfo> users)
+        {
+            while (users.Count > 0)
+            {
+                await DeviceStream.SendCommand(new SetStaffDataCommand(DeviceId, users));
+            }
         }
     }
 }

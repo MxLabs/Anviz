@@ -1,4 +1,6 @@
-﻿using Anviz.SDK.Utils;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Utils;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -12,6 +14,17 @@ namespace Anviz.SDK.Commands
             payload[5] = 1;
             template.CopyTo(payload, 6);
             BuildPayload(SET_FACETEMPLATE, payload);
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task SetFaceTemplate(ulong employeeID, byte[] template)
+        {
+            await DeviceStream.SendCommand(new SetFaceTemplateCommand(DeviceId, employeeID, template));
         }
     }
 }

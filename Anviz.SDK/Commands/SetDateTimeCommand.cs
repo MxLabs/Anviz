@@ -1,5 +1,7 @@
-﻿using Anviz.SDK.Utils;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Utils;
 using System;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -9,6 +11,18 @@ namespace Anviz.SDK.Commands
         public SetDateTimeCommand(ulong deviceId, DateTime dateTime) : base(deviceId)
         {
             BuildPayload(SET_DATETIME, DateConversions.DateTimeToByteArray(dateTime));
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task SetDateTime(DateTime dateTime)
+        {
+            var cmd = new SetDateTimeCommand(DeviceId, dateTime);
+            await DeviceStream.SendCommand(cmd);
         }
     }
 }

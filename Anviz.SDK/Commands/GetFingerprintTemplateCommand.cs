@@ -1,4 +1,6 @@
-﻿using Anviz.SDK.Utils;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Utils;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -11,6 +13,18 @@ namespace Anviz.SDK.Commands
             Bytes.Write(5, employeeID).CopyTo(payload, 0);
             payload[5] = (byte)(finger + 1);
             BuildPayload(GET_FPTEMPLATE, payload);
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task<byte[]> GetFingerprintTemplate(ulong employeeID, Finger finger)
+        {
+            var response = await DeviceStream.SendCommand(new GetFingerprintTemplateCommand(DeviceId, employeeID, finger));
+            return response.DATA;
         }
     }
 }

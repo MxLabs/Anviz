@@ -1,4 +1,6 @@
-﻿using Anviz.SDK.Utils;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Utils;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -12,6 +14,19 @@ namespace Anviz.SDK.Commands
             payload[5] = 1;
             payload[6] = (byte)(isFirst ? 0 : 1);
             BuildPayload(ENROLL_FINGERPRINT, payload);
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task<byte[]> EnrollFingerprint(ulong employeeID)
+        {
+            await DeviceStream.SendCommand(new EnrollFingerprintCommand(DeviceId, employeeID, true));
+            await DeviceStream.SendCommand(new EnrollFingerprintCommand(DeviceId, employeeID, false));
+            return await GetFingerprintTemplate(employeeID, 0);
         }
     }
 }
