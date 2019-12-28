@@ -16,6 +16,7 @@
             {
                 case "FACE7": //FACEPASS7
                     return BiometricType.Face;
+                case "W1": //W1 (PRO)
                 case "TC-B-N": //TC550
                     return BiometricType.Finger;
                 default:
