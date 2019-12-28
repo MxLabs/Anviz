@@ -11,7 +11,7 @@ namespace Anviz.SDK
     public class AnvizDevice : IDisposable
     {
         public ulong DeviceId { get; private set; } = 0;
-        public BiometricType DeviceBiometricType { get; private set; } = BiometricType.Unknow;
+        public BiometricType DeviceBiometricType { get; private set; } = BiometricType.Unknown;
         private readonly AnvizStream DeviceStream;
 
         public event EventHandler DevicePing;
