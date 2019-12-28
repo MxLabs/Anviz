@@ -2,7 +2,7 @@
 {
     public enum BiometricType
     {
-        Unknow = 0,
+        Unknown = 0,
         Finger = 1,
         Face = 2,
         Iris = 3
@@ -19,7 +19,7 @@
                 case "TC-B-N": //TC550
                     return BiometricType.Finger;
                 default:
-                    return BiometricType.Unknow;
+                    return BiometricType.Unknown;
             }
         }
     }
