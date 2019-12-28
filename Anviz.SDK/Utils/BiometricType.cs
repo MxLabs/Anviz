@@ -10,9 +10,9 @@
 
     public static class BiometricTypes
     {
-        public static BiometricType DecodeBiometricType(byte[] data)
+        public static BiometricType DecodeBiometricType(string code)
         {
-            switch (Bytes.GetAsciiString(data))
+            switch (code)
             {
                 case "FACE7": //FACEPASS7
                     return BiometricType.Face;
