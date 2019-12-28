@@ -11,6 +11,7 @@ namespace Anviz.SDK
     public class AnvizDevice : IDisposable
     {
         public ulong DeviceId { get; private set; } = 0;
+        public BiometricType DeviceBiometricType { get; private set; } = BiometricType.Unknown;
         private readonly AnvizStream DeviceStream;
 
         public event EventHandler DevicePing;
@@ -151,6 +152,17 @@ namespace Anviz.SDK
             await DeviceStream.SendCommand(new SetFingerprintTemplateCommand(DeviceId, employeeID, finger, template));
         }
 
+        public async Task<byte[]> GetFaceTemplate(ulong employeeID)
+        {
+            var response = await DeviceStream.SendCommand(new GetFaceTemplateCommand(DeviceId, employeeID));
+            return response.DATA;
+        }
+
+        public async Task SetFaceTemplate(ulong employeeID, byte[] template)
+        {
+            await DeviceStream.SendCommand(new SetFaceTemplateCommand(DeviceId, employeeID, template));
+        }
+
         public async Task<byte[]> EnrollFingerprint(ulong employeeID)
         {
             await DeviceStream.SendCommand(new EnrollFingerprintCommand(DeviceId, employeeID, true));
@@ -200,6 +212,13 @@ namespace Anviz.SDK
         {
             var response = await DeviceStream.SendCommand(new GetDeviceTypeCommand(DeviceId));
             return Bytes.GetAsciiString(response.DATA);
+        }
+
+        public async Task<BiometricType> GetDeviceBiometricType()
+        {
+            var response = await DeviceStream.SendCommand(new GetDeviceTypeCommand(DeviceId));
+            DeviceBiometricType = BiometricTypes.DecodeBiometricType(response.DATA);
+            return DeviceBiometricType; 
         }
 
         public async Task RebootDevice()

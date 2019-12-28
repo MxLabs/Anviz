@@ -71,7 +71,7 @@ namespace Anviz.SDK
             await cmd.Send(DeviceStream);
             taskEmitter = new TaskCompletionSource<Response>();
             var result = await taskEmitter.Task;
-            if(result == null)
+            if (result == null)
             {
                 throw new Exception("Device connection lost.");
             }
