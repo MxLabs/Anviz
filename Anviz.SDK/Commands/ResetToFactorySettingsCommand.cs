@@ -1,4 +1,7 @@
-﻿namespace Anviz.SDK.Commands
+﻿using Anviz.SDK.Commands;
+using System.Threading.Tasks;
+
+namespace Anviz.SDK.Commands
 {
     class ResetToFactorySettingsCommand : Command
     {
@@ -6,6 +9,17 @@
         public ResetToFactorySettingsCommand(ulong deviceId) : base(deviceId)
         {
             BuildPayload(DEVICE_RESET, new byte[] { });
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task ResetToFactorySettings()
+        {
+            await DeviceStream.SendCommand(new ResetToFactorySettingsCommand(DeviceId));
         }
     }
 }

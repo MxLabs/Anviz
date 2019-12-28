@@ -1,5 +1,8 @@
-﻿using Anviz.SDK.Responses;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Responses;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -13,6 +16,32 @@ namespace Anviz.SDK.Commands
             byte recordType = onlyNew ? GET_NEW_RECORDS : GET_ALL_RECORDS;
             byte kind = isFirst ? recordType : (byte)0;
             BuildPayload(GET_RECORDS, new byte[] { kind, (byte)Math.Min(amount, Record.MAX_RECORDS) });
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task<List<Record>> DownloadRecords(bool onlyNew = false)
+        {
+            var statistics = await GetDownloadInformation();
+            var recordAmount = onlyNew ? statistics.NewRecordAmount : statistics.AllRecordAmount;
+            var records = new List<Record>((int)recordAmount);
+            var isFirst = true;
+            while (recordAmount > 0)
+            {
+                var response = await DeviceStream.SendCommand(new GetRecordsCommand(DeviceId, isFirst, onlyNew, recordAmount));
+                var counter = response.DATA[0];
+                recordAmount -= counter;
+                for (var i = 0; i < counter; i++)
+                {
+                    records.Add(new Record(response.DATA, 1 + i * Record.RECORD_LENGTH));
+                }
+                isFirst = false;
+            }
+            return records;
         }
     }
 }

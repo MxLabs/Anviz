@@ -1,4 +1,8 @@
-﻿namespace Anviz.SDK.Commands
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Utils;
+using System.Threading.Tasks;
+
+namespace Anviz.SDK.Commands
 {
     class GetDeviceIDCommand : Command
     {
@@ -6,6 +10,19 @@
         public GetDeviceIDCommand(ulong deviceId) : base(deviceId)
         {
             BuildPayload(GET_DEVICE_ID, new byte[] { });
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task<ulong> GetDeviceID()
+        {
+            var response = await DeviceStream.SendCommand(new GetDeviceIDCommand(DeviceId));
+            DeviceId = Bytes.Read(response.DATA);
+            return DeviceId;
         }
     }
 }

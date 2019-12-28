@@ -1,4 +1,6 @@
-﻿using Anviz.SDK.Utils;
+﻿using Anviz.SDK.Commands;
+using Anviz.SDK.Utils;
+using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
 {
@@ -8,6 +10,21 @@ namespace Anviz.SDK.Commands
         public SetDeviceIDCommand(ulong deviceId, ulong newDeviceId) : base(deviceId)
         {
             BuildPayload(SET_DEVICE_ID, Bytes.Write(4, newDeviceId));
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task SetDeviceID(ulong newDeviceId)
+        {
+            await DeviceStream.SendCommand(new SetDeviceIDCommand(DeviceId, newDeviceId));
+            if (DeviceId != 0)
+            {
+                DeviceId = newDeviceId;
+            }
         }
     }
 }

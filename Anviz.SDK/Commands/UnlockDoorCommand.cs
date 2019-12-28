@@ -1,4 +1,7 @@
-﻿namespace Anviz.SDK.Commands
+﻿using Anviz.SDK.Commands;
+using System.Threading.Tasks;
+
+namespace Anviz.SDK.Commands
 {
     class UnlockDoorCommand : Command
     {
@@ -6,6 +9,17 @@
         public UnlockDoorCommand(ulong deviceId) : base(deviceId)
         {
             BuildPayload(DEVICE_UNLOCKDOOR, new byte[] { });
+        }
+    }
+}
+
+namespace Anviz.SDK
+{
+    public partial class AnvizDevice
+    {
+        public async Task UnlockDoor()
+        {
+            await DeviceStream.SendCommand(new UnlockDoorCommand(DeviceId));
         }
     }
 }

@@ -7,34 +7,35 @@
 Features 
 ----------------
 
-- [x] Clear records
-- [x] Delete the designated user data
-- [x] Enroll user fingerprint 
-- [x] Get advanced device information
-- [x] Get basic device information
-- [x] Get the date and time 
-- [x] Get device S/N
-- [x] Get device ID
-- [x] Get device type information
-- [x] Download fingerprint template
-- [x] Get record information
-- [x] Download records
-- [x] Download employees data
-- [x] Get TCP/IP parameters
-- [x] Reboot device
-- [x] Recover to factory settings
-- [x] Set advanced settings
-- [x] Set basic settings
-- [x] Set the date and time
-- [x] Set device S/N
-- [x] Set device ID
-- [x] Upload fingerprint template
-- [x] Upload staff information
-- [x] Upload records
-- [x] Set TCP/IP parameters
-- [x] Send signal to open lock without verifying user
-- [x] Receive device pings
-- [x] Read packets asynchronously
+- Clear records
+- Delete the designated user data
+- Enroll user fingerprint 
+- Get advanced device information
+- Get basic device information
+- Get the date and time 
+- Get device S/N
+- Get device ID
+- Get device type information
+- Download fingerprint template
+- Get record information
+- Download records
+- Download employees data
+- Get TCP/IP parameters
+- Reboot device
+- Recover to factory settings
+- Get and set facepass templates
+- Set advanced settings
+- Set basic settings
+- Set the date and time
+- Set device S/N
+- Set device ID
+- Upload fingerprint template
+- Upload staff information
+- Upload records
+- Set TCP/IP parameters
+- Send signal to open lock without verifying user
+- Receive device pings
+- Read packets asynchronously
 
 Tested devices
 --------
@@ -42,3 +43,4 @@ Tested devices
  - VF Series
  - W1 Pro
  - P7
+ - Facepass 7
