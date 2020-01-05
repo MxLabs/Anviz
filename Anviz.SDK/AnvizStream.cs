@@ -20,6 +20,7 @@ namespace Anviz.SDK
         private TaskCompletionSource<Response> taskEmitter;
 
         public event EventHandler<Response> ReceivedPacket;
+        public event EventHandler<Exception> DeviceError;
 
         public AnvizStream(TcpClient socket)
         {
@@ -42,7 +43,15 @@ namespace Anviz.SDK
         {
             while (!CancellationTokenSource.IsCancellationRequested)
             {
-                var response = await Response.FromStream(DeviceStream, CancellationTokenSource.Token);
+                Response response = null;
+                try
+                {
+                    response = await Response.FromStream(DeviceStream, CancellationTokenSource.Token);
+                }
+                catch (Exception ex)
+                {
+                    DeviceError?.Invoke(this, ex);
+                }
                 if (response == null)
                 {
                     DeviceSocket.Close();
