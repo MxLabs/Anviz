@@ -13,6 +13,7 @@ namespace Anviz.SDK
 
         public event EventHandler DevicePing;
         public event EventHandler<Response> ReceivedPacket;
+        public event EventHandler<Exception> DeviceError;
 
         public AnvizDevice(TcpClient socket)
         {
@@ -27,6 +28,10 @@ namespace Anviz.SDK
                 {
                     ReceivedPacket?.Invoke(this, e);
                 }
+            };
+            DeviceStream.DeviceError += (s, e) =>
+            {
+                DeviceError?.Invoke(this, e);
             };
         }
 
