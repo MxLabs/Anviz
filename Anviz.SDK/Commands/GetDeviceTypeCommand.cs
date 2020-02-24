@@ -21,6 +21,7 @@ namespace Anviz.SDK
         public async Task<string> GetDeviceTypeCode()
         {
             var response = await DeviceStream.SendCommand(new GetDeviceTypeCommand(DeviceId));
+            DeviceId = response.DeviceID;
             return Bytes.GetAsciiString(response.DATA);
         }
 
