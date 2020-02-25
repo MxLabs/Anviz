@@ -18,6 +18,7 @@ namespace Anviz.SDK
 {
     public partial class AnvizDevice
     {
+        [System.Obsolete]
         public async Task<ulong> GetDeviceID()
         {
             var response = await DeviceStream.SendCommand(new GetDeviceIDCommand(DeviceId));
