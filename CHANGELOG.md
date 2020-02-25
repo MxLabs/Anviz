@@ -13,6 +13,11 @@ MISC:
 
 UPGRADE NOTES:
 
+## v2.0.9
+UPGRADE NOTES:
+* GetDeviceID is now deprecated in favor of DeviceID property
+
+
 ## v2.0.0
 BREAKING CHANGES:
 

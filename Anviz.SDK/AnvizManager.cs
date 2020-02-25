@@ -56,7 +56,6 @@ namespace Anviz.SDK
             {
                 await device.SetConnectionPassword(ConnectionUser, ConnectionPassword);
             }
-            await device.GetDeviceID();
             await device.GetDeviceBiometricType();
             return device;
         }

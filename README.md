@@ -44,3 +44,4 @@ Tested devices
  - W1 Pro
  - P7
  - Facepass 7
+ - WF30 Pro
