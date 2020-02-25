@@ -28,7 +28,7 @@ namespace Sample
                 device.DevicePing += (s, e) => Console.WriteLine("Device Ping Received");
                 device.ReceivedPacket += (s, e) => Console.WriteLine("Received packet");
                 device.DeviceError += (s, e) => throw e;
-                var id = await device.GetDeviceID();
+                var id = device.DeviceId;
                 var sn = await device.GetDeviceSN();
                 var type = await device.GetDeviceTypeCode();
                 var biotype = await device.GetDeviceBiometricType();
