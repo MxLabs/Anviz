@@ -98,5 +98,18 @@ namespace Sample
             }
             Console.ReadLine();
         }
+
+        public static async void FacepassExample()
+        {
+            var manager = new AnvizManager();
+            ulong employee_id = 5; // number of employee ID, Example 5
+            using (var device = await manager.Accept())
+            {
+                var fp = await device.EnrollFingerprint(employee_id, 1);
+                var employee = new Anviz.SDK.Responses.UserInfo(employee_id, "name of employee");
+                await device.SetEmployeesData(employee);
+                await device.SetFaceTemplate(employee.Id, fp);
+            }
+        }
     }
 }
