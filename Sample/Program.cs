@@ -46,7 +46,7 @@ namespace Sample
                     Console.WriteLine("Updated device time according to local time");
                 }
                 var net = await device.GetTcpParameters();
-                Console.WriteLine($"Device IP is {net.IP} {net.SubnetMask} {net.DefaultGateway} {net.MacAddress} mode is {net.TcpMode.ToString()}");
+                Console.WriteLine($"Device IP is {net.IP} {net.SubnetMask} {net.DefaultGateway} {net.MacAddress} mode is {net.TcpMode}");
 #if false //here you can change network parameters
                 net.DefaultGateway = IPAddress.Parse("10.0.0.5");
                 await device.SetTCPParameters(net);

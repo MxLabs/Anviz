@@ -25,7 +25,7 @@ namespace Anviz.SDK
     {
         public async Task<byte[]> EnrollFingerprint(ulong employeeID, int verifyCount = 2)
         {
-            if(verifyCount < 1)
+            if (verifyCount < 1)
             {
                 throw new ArgumentException("verifyCount should be at least 1");
             }
