@@ -1,17 +1,6 @@
-## UNRELEASED
-BREAKING CHANGES:
-
-FEATURES:
-
-BUG FIXES:
-
+## v2.0.10
 IMPROVEMENTS:
-
-SECURITY:
-
-MISC:
-
-UPGRADE NOTES:
+* EnrollFingerprint: you can now specify number of times to check user FP. Default to 2 (old behaviour)
 
 ## v2.0.9
 UPGRADE NOTES:
