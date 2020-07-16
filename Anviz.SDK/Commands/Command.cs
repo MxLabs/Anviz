@@ -1,5 +1,4 @@
 ﻿using Anviz.SDK.Utils;
-using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -21,10 +20,14 @@ namespace Anviz.SDK.Commands
         {
             ResponseCode = (byte)(command + 0x80);
             var dataLength = (ushort)data.Length;
-            if (dataLength > 400)
-            {
-                throw new Exception("Payload too big");
-            }
+            /* NOTE: in the original specification, the payload must be less than 400 bytes
+             * However, issue #45 found that Facepass devices use much bigger payloads
+             * 
+             * if (dataLength > 400)
+             * {
+             *     throw new Exception("Payload too big");
+             * }
+             */
             Payload = new byte[8 + dataLength + 2]; //preamble + data + crc
             Payload[0] = 0xA5;
             Payload[1] = (byte)((DeviceId >> 24) % 256);
