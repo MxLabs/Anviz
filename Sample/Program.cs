@@ -46,7 +46,7 @@ namespace Sample
                     Console.WriteLine("Updated device time according to local time");
                 }
                 var net = await device.GetTcpParameters();
-                Console.WriteLine($"Device IP is {net.IP} {net.SubnetMask} {net.DefaultGateway} {net.MacAddress} mode is {net.TcpMode.ToString()}");
+                Console.WriteLine($"Device IP is {net.IP} {net.SubnetMask} {net.DefaultGateway} {net.MacAddress} mode is {net.TcpMode}");
 #if false //here you can change network parameters
                 net.DefaultGateway = IPAddress.Parse("10.0.0.5");
                 await device.SetTCPParameters(net);
@@ -97,6 +97,19 @@ namespace Sample
                 await device.ClearNewRecords();
             }
             Console.ReadLine();
+        }
+
+        public static async void FacepassExample()
+        {
+            var manager = new AnvizManager();
+            ulong employee_id = 5; // number of employee ID, Example 5
+            using (var device = await manager.Accept())
+            {
+                var fp = await device.EnrollFingerprint(employee_id, 1);
+                var employee = new Anviz.SDK.Responses.UserInfo(employee_id, "name of employee");
+                await device.SetEmployeesData(employee);
+                await device.SetFaceTemplate(employee.Id, fp);
+            }
         }
     }
 }

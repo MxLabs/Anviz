@@ -1,5 +1,6 @@
 ﻿using Anviz.SDK.Commands;
 using Anviz.SDK.Utils;
+using System;
 using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
@@ -22,10 +23,18 @@ namespace Anviz.SDK
 {
     public partial class AnvizDevice
     {
-        public async Task<byte[]> EnrollFingerprint(ulong employeeID)
+        public async Task<byte[]> EnrollFingerprint(ulong employeeID, int verifyCount = 2)
         {
-            await DeviceStream.SendCommand(new EnrollFingerprintCommand(DeviceId, employeeID, true));
-            await DeviceStream.SendCommand(new EnrollFingerprintCommand(DeviceId, employeeID, false));
+            if (verifyCount < 1)
+            {
+                throw new ArgumentException("verifyCount should be at least 1");
+            }
+            var first = true;
+            while (verifyCount-- > 0)
+            {
+                await DeviceStream.SendCommand(new EnrollFingerprintCommand(DeviceId, employeeID, first));
+                first = false;
+            }
             return await GetFingerprintTemplate(employeeID, 0);
         }
     }
