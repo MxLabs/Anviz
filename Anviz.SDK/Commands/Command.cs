@@ -20,6 +20,15 @@ namespace Anviz.SDK.Commands
         {
             ResponseCode = (byte)(command + 0x80);
             var dataLength = (ushort)data.Length;
+            var payloadLength = 8 + dataLength + 2; //preamble + data + crc
+            if (command > 0x80)
+            {
+                /* this case is actually a response, but since it is 
+                 * used only for Pong, we threat it as a special case
+                 * instead of creating a full ResponseBuildPayload
+                 */
+                payloadLength += 1; // RET
+            }
             /* NOTE: in the original specification, the payload must be less than 400 bytes
              * However, issue #45 found that Facepass devices use much bigger payloads
              * 
@@ -28,7 +37,6 @@ namespace Anviz.SDK.Commands
              *     throw new Exception("Payload too big");
              * }
              */
-            var payloadLength = 8 + dataLength + 2; //preamble + data + crc
             var i = 0;
             Payload = new byte[payloadLength];
             Payload[i++] = 0xA5;
@@ -37,6 +45,10 @@ namespace Anviz.SDK.Commands
             Payload[i++] = (byte)((DeviceId >> 8) % 256);
             Payload[i++] = (byte)(DeviceId % 256);
             Payload[i++] = command;
+            if (command > 0x80)
+            {
+                Payload[i++] = 0; // RET
+            }
             Payload[i++] = (byte)(dataLength >> 8);
             Payload[i++] = (byte)(dataLength % 256);
             data.CopyTo(Payload, i);
