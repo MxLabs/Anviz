@@ -13,6 +13,7 @@ namespace Anviz.SDK
 
         public event EventHandler DevicePing;
         public event EventHandler<Response> ReceivedPacket;
+        public event EventHandler<Record> ReceivedRecord;
         public event EventHandler<Exception> DeviceError;
 
         public AnvizDevice(TcpClient socket)
@@ -20,14 +21,18 @@ namespace Anviz.SDK
             DeviceStream = new AnvizStream(socket);
             DeviceStream.ReceivedPacket += async (s, e) =>
             {
-                if (e.ResponseCode == 0x7F)
+                switch (e.ResponseCode)
                 {
-                    await DeviceStream.SendCommand(new Commands.PongCommand(DeviceId));
-                    DevicePing?.Invoke(this, null);
-                }
-                else
-                {
-                    ReceivedPacket?.Invoke(this, e);
+                    case 0x7F:
+                        await DeviceStream.SendCommand(new Commands.PongCommand(DeviceId));
+                        DevicePing?.Invoke(this, null);
+                        break;
+                    case 0xDF:
+                        ReceivedRecord?.Invoke(this, new Record(e.DATA, 0));
+                        break;
+                    default:
+                        ReceivedPacket?.Invoke(this, e);
+                        break;
                 }
             };
             DeviceStream.DeviceError += (s, e) =>
