@@ -1,3 +1,7 @@
+## v2.0.11
+IMPROVEMENTS:
+* Ping requests are now automatically answered
+
 ## v2.0.10
 IMPROVEMENTS:
 * EnrollFingerprint: you can now specify number of times to check user FP. Default to 2 (old behaviour)
@@ -5,7 +9,6 @@ IMPROVEMENTS:
 ## v2.0.9
 UPGRADE NOTES:
 * GetDeviceID is now deprecated in favor of DeviceID property
-
 
 ## v2.0.0
 BREAKING CHANGES:

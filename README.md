@@ -36,6 +36,8 @@ Features
 - Send signal to open lock without verifying user
 - Receive device pings
 - Read packets asynchronously
+- RealTime support
+- Automatically answer ping requests
 
 Tested devices
 --------
