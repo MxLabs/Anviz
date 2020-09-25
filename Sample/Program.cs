@@ -27,6 +27,7 @@ namespace Sample
             {
                 device.DevicePing += (s, e) => Console.WriteLine("Device Ping Received");
                 device.ReceivedPacket += (s, e) => Console.WriteLine("Received packet");
+                device.ReceivedRecord += (s, e) => Console.WriteLine($"Received record {e.DateTime.ToShortTimeString()}");
                 device.DeviceError += (s, e) => throw e;
                 var id = device.DeviceId;
                 var sn = await device.GetDeviceSN();
@@ -66,6 +67,12 @@ namespace Sample
                 advanced.RepeatAttendanceDelay = 1;
                 await device.SetAdvancedSettings(advanced);
 #endif
+                if (!advanced.RealTimeMode)
+                {
+                    advanced.RealTimeMode = true;
+                    await device.SetAdvancedSettings(advanced);
+                    Console.WriteLine("Enable RealTimeMode");
+                }
                 var stats = await device.GetDownloadInformation();
                 Console.WriteLine($"TotalUsers {stats.UserAmount} TotalRecords {stats.AllRecordAmount}");
                 var employees = await device.GetEmployeesData();
@@ -95,6 +102,9 @@ namespace Sample
                     Console.WriteLine($"Employee {dict[rec.UserCode]} at {rec.DateTime.ToLongDateString()} {rec.DateTime.ToLongTimeString()}");
                 }
                 await device.ClearNewRecords();
+
+                //wait here for RealTime records
+                await Task.Delay(TimeSpan.FromMinutes(5));
             }
             Console.ReadLine();
         }
