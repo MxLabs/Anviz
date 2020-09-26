@@ -19,12 +19,11 @@ namespace Anviz.SDK
         public AnvizDevice(TcpClient socket)
         {
             DeviceStream = new AnvizStream(socket);
-            DeviceStream.ReceivedPacket += async (s, e) =>
+            DeviceStream.ReceivedPacket += (s, e) =>
             {
                 switch (e.ResponseCode)
                 {
                     case 0x7F:
-                        await DeviceStream.SendCommand(new Commands.PongCommand(DeviceId));
                         DevicePing?.Invoke(this, null);
                         break;
                     case 0xDF:
