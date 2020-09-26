@@ -58,6 +58,11 @@ namespace Anviz.SDK
                     taskEmitter.TrySetResult(null);
                     break;
                 }
+                if (response.ResponseCode == 0x7F)
+                {
+                    await new PongCommand(response.DeviceID).Send(DeviceStream);
+                    ReceivedPacket?.Invoke(this, response);
+                }
                 else if (response.ResponseCode == ResponseCode)
                 {
                     ResponseCode = 0;
@@ -79,6 +84,10 @@ namespace Anviz.SDK
             ResponseCode = cmd.ResponseCode;
             await cmd.Send(DeviceStream);
             taskEmitter = new TaskCompletionSource<Response>();
+            if (await Task.WhenAny(taskEmitter.Task, Task.Delay(DEVICE_TIMEOUT)) != taskEmitter.Task)
+            {
+                throw new Exception("Device timeout waiting response.");
+            }
             var result = await taskEmitter.Task;
             if (result == null)
             {

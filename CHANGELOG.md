@@ -1,3 +1,8 @@
+## v2.0.13
+BUG FIXES:
+* Pong response was resetting internal state for parsing responses
+* `SendCommand` now implements better timeout handling
+
 ## v2.0.12
 BUG FIXES:
 * Nuget signing key error
