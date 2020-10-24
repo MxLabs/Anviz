@@ -1,3 +1,7 @@
+## v2.0.14
+FEATURES:
+* Get/set device TimeZone information
+
 ## v2.0.13
 BUG FIXES:
 * Pong response was resetting internal state for parsing responses

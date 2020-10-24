@@ -38,6 +38,7 @@ Features
 - Read packets asynchronously
 - RealTime support
 - Automatically answer ping requests
+- Get/set TimeZone information
 
 Tested devices
 --------

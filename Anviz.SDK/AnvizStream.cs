@@ -41,7 +41,7 @@ namespace Anviz.SDK
 
         private async void ReceiverThreadFunc()
         {
-            while (!CancellationTokenSource.IsCancellationRequested)
+            while (DeviceSocket.Connected && !CancellationTokenSource.IsCancellationRequested)
             {
                 Response response = null;
                 try
@@ -86,6 +86,10 @@ namespace Anviz.SDK
             taskEmitter = new TaskCompletionSource<Response>();
             if (await Task.WhenAny(taskEmitter.Task, Task.Delay(DEVICE_TIMEOUT)) != taskEmitter.Task)
             {
+                if (DeviceSocket.Connected)
+                {
+                    DeviceSocket.Close();
+                }
                 throw new Exception("Device timeout waiting response.");
             }
             var result = await taskEmitter.Task;
