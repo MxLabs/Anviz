@@ -9,6 +9,13 @@ namespace Anviz.SDK.Responses
         High
     }
 
+    public enum RelayMode
+    {
+        Door = 0,
+        Bell = 1,
+        None = 3
+    }
+
     public class AdvancedSettings
     {
         public FPPrecision FPPrecision { get; set; }
@@ -17,7 +24,7 @@ namespace Anviz.SDK.Responses
         public bool WorkCode { get; set; }
         public bool RealTimeMode { get; set; }
         public bool FPAutoUpdate { get; set; }
-        public byte RelayMode { get; set; }
+        public RelayMode RelayMode { get; set; }
         public byte LockDelay { get; set; }
         public ulong MemoryFullAlarm { get; set; }
         public byte RepeatAttendanceDelay { get; set; }
@@ -33,7 +40,7 @@ namespace Anviz.SDK.Responses
             WorkCode = data[3] > 0;
             RealTimeMode = data[4] > 0;
             FPAutoUpdate = data[5] > 0;
-            RelayMode = data[6];
+            RelayMode = (RelayMode)data[6];
             LockDelay = data[7];
             MemoryFullAlarm = Bytes.Read(Bytes.Split(data, 8, 3));
             RepeatAttendanceDelay = data[11];
@@ -51,7 +58,7 @@ namespace Anviz.SDK.Responses
             ret[3] = (byte)(WorkCode ? 1 : 0);
             ret[4] = (byte)(RealTimeMode ? 1 : 0);
             ret[5] = (byte)(FPAutoUpdate ? 1 : 0);
-            ret[6] = RelayMode;
+            ret[6] = (byte)RelayMode;
             ret[7] = LockDelay;
             Bytes.Write(3, MemoryFullAlarm).CopyTo(ret, 8);
             ret[11] = RepeatAttendanceDelay;

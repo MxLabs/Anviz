@@ -1,3 +1,7 @@
+## v2.0.15
+IMPROVEMENTS:
+* `RelayMode` is now an enum
+
 ## v2.0.14
 FEATURES:
 * Get/set device TimeZone information
