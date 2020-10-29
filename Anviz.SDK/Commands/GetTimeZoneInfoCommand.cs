@@ -12,7 +12,7 @@ namespace Anviz.SDK.Commands
         {
             if (number < 1 || number > AnvizTimeZone.MAX_TIMEZONE_SLOT)
             {
-                throw new ArgumentOutOfRangeException("number", "Must be within 0 to AnvizTimeZone.MAX_TIMEZONE_SLOT");
+                throw new ArgumentOutOfRangeException("number", "Must be within 1 to AnvizTimeZone.MAX_TIMEZONE_SLOT");
             }
             BuildPayload(GET_TIMEZONE_INFO, new byte[] { number });
         }
