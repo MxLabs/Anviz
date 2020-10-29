@@ -39,6 +39,7 @@ Features
 - RealTime support
 - Automatically answer ping requests
 - Get/set TimeZone information
+- Get/set Schedule Bells
 
 Tested devices
 --------
