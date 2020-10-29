@@ -1,3 +1,11 @@
+## v2.0.15
+FEATURES:
+* Get/set device Scheduled Bells
+
+IMPROVEMENTS:
+* `RelayMode` is now an enum
+* Check TimeZone ranges
+
 ## v2.0.14
 FEATURES:
 * Get/set device TimeZone information
