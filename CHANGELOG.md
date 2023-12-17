@@ -1,3 +1,7 @@
+## v2.0.16
+FEATURES:
+* InquireCard command to read current card, like EnrollFingerprint
+
 ## v2.0.15
 FEATURES:
 * Get/set device Scheduled Bells

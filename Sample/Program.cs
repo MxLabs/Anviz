@@ -67,6 +67,8 @@ namespace Sample
                 advanced.RepeatAttendanceDelay = 1;
                 await device.SetAdvancedSettings(advanced);
 #endif
+                var card = await device.InquireCard();
+                Console.WriteLine($"Current scanned card: {card}");
                 if (!advanced.RealTimeMode)
                 {
                     advanced.RealTimeMode = true;
