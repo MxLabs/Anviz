@@ -9,10 +9,10 @@ Features
 
 - Clear records
 - Delete the designated user data
-- Enroll user fingerprint 
+- Enroll user fingerprint or card
 - Get advanced device information
 - Get basic device information
-- Get the date and time 
+- Get the date and time
 - Get device S/N
 - Get device ID
 - Get device type information
