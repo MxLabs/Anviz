@@ -1,0 +1,39 @@
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+  
+env:
+  NuGetDirectory: ${{ github.workspace }}/nuget
+  ProjectPath: Anviz.SDK/Anviz.SDK.csproj
+  
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: oprypin/find-latest-tag@v1
+        with:
+          repository: MxLabs/Anviz
+          releases-only: true 
+        id: anviz
+
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Publishing project
+      run: dotnet publish $ {{ env.ProjectPath }} --no-restore
+
+    - name: Publishing project
+      run: dotnet pack -c Release /p:PackageVersion=${{ steps.anviz.outputs.tag }} -o ${{ env.NuGetDirectory }}
+
+    - name: Publishing NuGet package
+      run: dotnet nuget push ${{ env.NuGetDirectory }}/Anviz.SDK.${{ steps.anviz.outputs.tag }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
