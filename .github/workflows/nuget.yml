@@ -33,7 +33,7 @@ jobs:
       run: dotnet publish ${{ env.ProjectPath }} --no-restore
 
     - name: Packing Nuget package
-      run: dotnet pack -c Release /p:PackageVersion=${{ steps.anviz.outputs.tag }} -o ${{ env.NuGetDirectory }}
+      run: dotnet pack ${{ env.ProjectPath }} -c Release /p:PackageVersion=${{ steps.anviz.outputs.tag }} -o ${{ env.NuGetDirectory }}
 
     - name: Publishing NuGet package
       run: dotnet nuget push ${{ env.NuGetDirectory }}/Anviz.SDK.${{ steps.anviz.outputs.tag }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
