@@ -32,7 +32,7 @@ jobs:
     - name: Publishing project
       run: dotnet publish ${{ env.ProjectPath }} --no-restore
 
-    - name: Publishing project
+    - name: Packing Nuget package
       run: dotnet pack -c Release /p:PackageVersion=${{ steps.anviz.outputs.tag }} -o ${{ env.NuGetDirectory }}
 
     - name: Publishing NuGet package
