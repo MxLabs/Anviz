@@ -23,6 +23,8 @@ namespace Anviz.SDK.Responses
 
         public DayName Days { get; set; }
 
+        public bool HasValue => Days != 0 && Days != (DayName)255;
+
         public ScheduledBell()
         {
             Days = 0;
