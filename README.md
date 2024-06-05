@@ -49,3 +49,4 @@ Tested devices
  - P7
  - Facepass 7
  - WF30 Pro
+ - A350C
