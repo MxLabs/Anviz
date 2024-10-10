@@ -1,5 +1,6 @@
 ﻿using Anviz.SDK.Commands;
 using Anviz.SDK.Utils;
+using System;
 using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
@@ -21,7 +22,7 @@ namespace Anviz.SDK
         public async Task<string> GetDeviceSN()
         {
             var response = await DeviceStream.SendCommand(new GetDeviceSNCommand(DeviceId));
-            return Bytes.GetAsciiString(response.DATA);
+            return Strings.RemoveNonPrintableChars(Bytes.GetAsciiString(response.DATA));
         }
     }
 }
