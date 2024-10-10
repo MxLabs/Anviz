@@ -21,13 +21,23 @@ namespace Anviz.SDK.Responses
         Maximum
     }
 
+    public enum Language : byte
+    {
+        SimplifiedChinese,
+        TraditionalChinese,
+        English,
+        French,
+        Spanish,
+        Portuguese
+    }
+
     public class BasicSettings
     {
         public string Firmware { get; }
         public ulong ManagementPassword { get; set; }
         public byte Sleep { get; set; }
         public Volume Volume { get; set; }
-        public byte Language { get; set; }
+        public Language Language { get; set; }
         public DateFormat DateFormat { get; set; }
         public bool Is24HourClock { get; set; }
         public byte Attendance { get; set; }
@@ -40,7 +50,7 @@ namespace Anviz.SDK.Responses
             ManagementPassword = Bytes.PasswordRead(Bytes.Split(data, 8, 3));
             Sleep = data[11];
             Volume = (Volume)data[12];
-            Language = data[13];
+            Language = (Language)data[13];
             DateFormat = (DateFormat)(data[14] & 0xFE);
             Is24HourClock = (data[14] & 0x01) == 0;
             Attendance = data[15];
@@ -54,7 +64,7 @@ namespace Anviz.SDK.Responses
             Bytes.PasswordWrite(ManagementPassword).CopyTo(ret, 0);
             ret[3] = Sleep;
             ret[4] = (byte)Volume;
-            ret[5] = Language;
+            ret[5] = (byte)Language;
             ret[6] = (byte)(DateFormat + (Is24HourClock ? 0 : 1));
             ret[7] = Attendance;
             ret[8] = LangCHG;
