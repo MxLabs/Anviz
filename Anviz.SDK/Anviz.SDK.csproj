@@ -9,7 +9,4 @@
     <RepositoryUrl>https://github.com/MxLabs/Anviz</RepositoryUrl>
     <PackageTags>anviz access-control fingerprint</PackageTags>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="Documentation\" />
-  </ItemGroup>
 </Project>
