@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net472</TargetFrameworks>
     <ProjectGuid>{30099B6A-183A-4003-8449-8F36A06462BA}</ProjectGuid>
     <Authors>Huseyin DEMIRTAS, Gianni Angelozzi</Authors>
     <Company>MxLabs</Company>
@@ -9,4 +9,7 @@
     <RepositoryUrl>https://github.com/MxLabs/Anviz</RepositoryUrl>
     <PackageTags>anviz access-control fingerprint</PackageTags>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Documentation\" />
+  </ItemGroup>
 </Project>
