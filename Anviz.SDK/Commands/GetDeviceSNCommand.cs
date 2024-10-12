@@ -22,7 +22,7 @@ namespace Anviz.SDK
         public async Task<string> GetDeviceSN()
         {
             var response = await DeviceStream.SendCommand(new GetDeviceSNCommand(DeviceId));
-            return Strings.RemoveNonPrintableChars(Bytes.GetAsciiString(response.DATA));
+            return Bytes.GetAsciiString(response.DATA);
         }
     }
 }
