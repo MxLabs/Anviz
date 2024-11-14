@@ -18,7 +18,7 @@ namespace Anviz.SDK.Commands
             BuildPayload(DELETE_STAFF_DATA, payload);
         }
 
-        public DeleteStaffDataCommand(ulong deviceId) : base(deviceId) 
+        public DeleteStaffDataCommand(ulong deviceId) : base(deviceId)
         {
             var payload = new byte[6];
             payload[5] = DELETE_FULL;
@@ -32,7 +32,6 @@ namespace Anviz.SDK.Commands
             payload[5] = (byte)method;
             BuildPayload(DELETE_STAFF_DATA, payload);
         }
-
     }
 }
 

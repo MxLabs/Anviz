@@ -1,6 +1,5 @@
 ﻿using Anviz.SDK.Commands;
 using Anviz.SDK.Utils;
-using System;
 using System.Threading.Tasks;
 
 namespace Anviz.SDK.Commands
