@@ -21,6 +21,16 @@ namespace Anviz.SDK.Responses
         public byte Keep { get; set; }
         public byte Message { get; set; }
 
+        /// <summary>
+        /// Whether the user is an administrator of the device: bits 7-6 of the special info
+        /// byte (<see cref="Message"/>) are 3 for an administrator and 1 for a normal user
+        /// </summary>
+        public bool IsAdmin
+        {
+            get => (Message >> 6) == 3;
+            set => Message = (byte)((Message & 0x3F) | (value ? 0xC0 : 0x40));
+        }
+
         internal UserInfo(byte[] data, int offset)
         {
             Id = Bytes.Read(Bytes.Split(data, offset, 5));

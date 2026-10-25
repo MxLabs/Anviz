@@ -57,14 +57,63 @@ namespace Anviz.SDK.Utils
             return data.Skip(start).Take(count).ToArray();
         }
 
+        /// <summary>
+        /// Reads a big endian UTF-16 string that ends at its first zero character: devices leave
+        /// bytes of an older value after it
+        /// </summary>
         public static string GetUnicodeString(byte[] data)
         {
-            return Encoding.BigEndianUnicode.GetString(data).TrimEnd('\0');
+            var text = Encoding.BigEndianUnicode.GetString(data);
+            var end = text.IndexOf('\0');
+            return end < 0 ? text : text.Substring(0, end);
         }
 
+        /// <summary>
+        /// Reads an ASCII string that ends at its first zero byte
+        /// </summary>
         public static string GetAsciiString(byte[] data)
         {
-            return Encoding.ASCII.GetString(data).TrimEnd('\0');
+            var text = Encoding.ASCII.GetString(data);
+            var end = text.IndexOf('\0');
+            return end < 0 ? text : text.Substring(0, end);
+        }
+
+        /// <summary>
+        /// Writes a string as big endian UTF-16 in length bytes, padded with zeros
+        /// </summary>
+        public static byte[] WriteUnicode(int length, string value)
+        {
+            var ret = new byte[length];
+            var bytes = Encoding.BigEndianUnicode.GetBytes(value ?? "");
+            System.Array.Copy(bytes, ret, System.Math.Min(bytes.Length, length));
+            return ret;
+        }
+
+        /// <summary>
+        /// Writes a string as ASCII in length bytes, padded with zeros
+        /// </summary>
+        public static byte[] WriteAscii(int length, string value)
+        {
+            var ret = new byte[length];
+            var bytes = Encoding.ASCII.GetBytes(value ?? "");
+            System.Array.Copy(bytes, ret, System.Math.Min(bytes.Length, length));
+            return ret;
+        }
+
+        /// <summary>
+        /// Reads a BCD byte: 0x22 is 22
+        /// </summary>
+        public static int ReadBcd(byte value)
+        {
+            return (value >> 4) * 10 + (value & 0x0F);
+        }
+
+        /// <summary>
+        /// Writes a number from 0 to 99 as a BCD byte: 22 is 0x22
+        /// </summary>
+        public static byte WriteBcd(int value)
+        {
+            return (byte)((value / 10) << 4 | (value % 10));
         }
     }
 }
