@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Anviz.SDK.Responses
 {
     /// <summary>
     /// When the device switches by itself to an attendance status (0x20, 0x21): a stretch of time
-    /// on each day of the week, Monday first
+    /// on each day of the week, Monday first. The hours and minutes are kept as the device gives
+    /// them, so a setting read is written back the same.
     /// </summary>
     public class StatusSwitching
     {
         public class Stretch
         {
-            public TimeSpan From { get; set; }
-            public TimeSpan To { get; set; }
+            public byte FromHour { get; set; }
+            public byte FromMinute { get; set; }
+            public byte ToHour { get; set; }
+            public byte ToMinute { get; set; }
         }
 
         public byte Number { get; }
@@ -37,8 +39,10 @@ namespace Anviz.SDK.Responses
             {
                 Days.Add(new Stretch
                 {
-                    From = new TimeSpan(data[i * 4], data[i * 4 + 1], 0),
-                    To = new TimeSpan(data[i * 4 + 2], data[i * 4 + 3], 0)
+                    FromHour = data[i * 4],
+                    FromMinute = data[i * 4 + 1],
+                    ToHour = data[i * 4 + 2],
+                    ToMinute = data[i * 4 + 3]
                 });
             }
             Status = data[28];
@@ -50,10 +54,10 @@ namespace Anviz.SDK.Responses
             ret[0] = Number;
             for (var i = 0; i < 7; i++)
             {
-                ret[1 + i * 4] = (byte)Days[i].From.Hours;
-                ret[2 + i * 4] = (byte)Days[i].From.Minutes;
-                ret[3 + i * 4] = (byte)Days[i].To.Hours;
-                ret[4 + i * 4] = (byte)Days[i].To.Minutes;
+                ret[1 + i * 4] = Days[i].FromHour;
+                ret[2 + i * 4] = Days[i].FromMinute;
+                ret[3 + i * 4] = Days[i].ToHour;
+                ret[4 + i * 4] = Days[i].ToMinute;
             }
             ret[29] = Status;
             return ret;

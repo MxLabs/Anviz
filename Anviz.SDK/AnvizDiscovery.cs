@@ -23,13 +23,18 @@ namespace Anviz.SDK
 
         /// <summary>
         /// Broadcasts a search to the given address (255.255.255.255 by default) and answers the
-        /// devices that replied within the wait, once each
+        /// devices that replied within the wait, once each. A device that answers it failed is
+        /// left out.
         /// </summary>
         public static async Task<List<DiscoveredDevice>> Search(TimeSpan wait, IPAddress broadcast = null)
         {
             var found = new Dictionary<string, DiscoveredDevice>();
-            foreach (var answer in await Broadcast(UDP_SEARCH, new byte[] { }, wait, broadcast))
+            foreach (var answer in await Broadcast(UDP_SEARCH, new byte[] { }, wait, broadcast, false))
             {
+                if (answer.Ret != 0)
+                {
+                    continue;
+                }
                 var device = new DiscoveredDevice(answer.From, answer.DeviceId, answer.Data);
                 found[device.MacAddress.ToString()] = device;
             }
@@ -48,17 +53,22 @@ namespace Anviz.SDK
             {
                 throw new TimeoutException("No device took the network setting");
             }
+            if (answers[0].Ret != 0)
+            {
+                throw new Exception("RET: " + answers[0].Ret);
+            }
         }
 
         private class Answer
         {
             public IPAddress From;
             public ulong DeviceId;
+            public byte Ret;
             public byte[] Data;
         }
 
-        private static async Task<List<Answer>> Broadcast(byte command, byte[] data, TimeSpan wait,
-            IPAddress broadcast, bool first = false)
+        private static Task<List<Answer>> Broadcast(byte command, byte[] data, TimeSpan wait,
+            IPAddress broadcast, bool first)
         {
             var frame = new byte[8 + data.Length + 2];
             frame[0] = 0xA5;
@@ -69,15 +79,22 @@ namespace Anviz.SDK
             var crc = CRC16.Compute(frame, frame.Length - 2);
             frame[frame.Length - 2] = (byte)(crc % 256);
             frame[frame.Length - 1] = (byte)(crc >> 8);
+            var to = new IPEndPoint(broadcast ?? IPAddress.Broadcast, DEVICE_PORT);
+            var ack = (byte)(command + 0x80);
+            // a blocking receive with a timeout: when the wait is over nothing is left listening
+            return Task.Run(() => Exchange(frame, to, ack, wait, first));
+        }
 
+        private static List<Answer> Exchange(byte[] frame, IPEndPoint to, byte ack, TimeSpan wait, bool first)
+        {
             var answers = new List<Answer>();
-            using (var client = new UdpClient())
+            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
             {
-                client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                client.Client.Bind(new IPEndPoint(IPAddress.Any, CLIENT_PORT));
-                client.EnableBroadcast = true;
-                var to = new IPEndPoint(broadcast ?? IPAddress.Broadcast, DEVICE_PORT);
-                await client.SendAsync(frame, frame.Length, to);
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                socket.EnableBroadcast = true;
+                socket.Bind(new IPEndPoint(IPAddress.Any, CLIENT_PORT));
+                socket.SendTo(frame, to);
+                var buffer = new byte[2048];
                 var until = DateTime.UtcNow + wait;
                 while (true)
                 {
@@ -86,18 +103,29 @@ namespace Anviz.SDK
                     {
                         break;
                     }
-                    var receiving = client.ReceiveAsync();
-                    if (await Task.WhenAny(receiving, Task.Delay(left)) != receiving)
+                    socket.ReceiveTimeout = Math.Max(1, (int)left.TotalMilliseconds);
+                    EndPoint from = new IPEndPoint(IPAddress.Any, 0);
+                    int length;
+                    try
+                    {
+                        length = socket.ReceiveFrom(buffer, ref from);
+                    }
+                    catch (SocketException e) when (e.SocketErrorCode == SocketError.TimedOut)
                     {
                         break;
                     }
-                    var received = receiving.Result;
-                    var answer = Parse(received.Buffer, (byte)(command + 0x80));
+                    catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionReset)
+                    {
+                        // Windows tells a "port unreachable" of an address that did not answer
+                        // this way; the others may still answer
+                        continue;
+                    }
+                    var answer = Parse(Bytes.Split(buffer, 0, length), ack);
                     if (answer == null)
                     {
                         continue;
                     }
-                    answer.From = received.RemoteEndPoint.Address;
+                    answer.From = ((IPEndPoint)from).Address;
                     answers.Add(answer);
                     if (first)
                     {
@@ -126,13 +154,10 @@ namespace Anviz.SDK
             {
                 return null;
             }
-            if (packet[6] != 0)
-            {
-                throw new Exception("RET: " + packet[6]);
-            }
             return new Answer
             {
                 DeviceId = Bytes.Read(Bytes.Split(packet, 1, 4)),
+                Ret = packet[6],
                 Data = Bytes.Split(packet, 9, length)
             };
         }

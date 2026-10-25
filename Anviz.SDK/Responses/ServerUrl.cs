@@ -26,7 +26,7 @@ namespace Anviz.SDK.Responses
         internal byte[] ToArray()
         {
             var ret = new byte[104];
-            Dns.GetAddressBytes().CopyTo(ret, 0);
+            Bytes.IPv4(Dns).CopyTo(ret, 0);
             Bytes.WriteAscii(100, Url).CopyTo(ret, 4);
             return ret;
         }

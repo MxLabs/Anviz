@@ -60,9 +60,9 @@ namespace Anviz.SDK
         }
 
         /// <summary>
-        /// Sets the administrator password of a T50; null removes it
+        /// Sets the administrator password of a T50
         /// </summary>
-        public async Task SetAdminPassword(ulong? password)
+        public async Task SetAdminPassword(ulong password)
         {
             var data = new byte[13];
             Bytes.PasswordWrite(password).CopyTo(data, 0);

@@ -18,6 +18,10 @@ namespace Anviz.SDK.Utils
 
         public static byte[] Write(int length, ulong value)
         {
+            if (length < 8 && value >> (length * 8) != 0)
+            {
+                throw new System.ArgumentOutOfRangeException("value", value, $"Does not fit in {length} bytes");
+            }
             var ret = new byte[length];
             while (value > 0)
             {
@@ -98,6 +102,45 @@ namespace Anviz.SDK.Utils
             var bytes = Encoding.ASCII.GetBytes(value ?? "");
             System.Array.Copy(bytes, ret, System.Math.Min(bytes.Length, length));
             return ret;
+        }
+
+        /// <summary>
+        /// The encoding of the fields the protocol calls ANSI. It names no code page; Latin-1 keeps
+        /// the accents of western languages, which ASCII turns into '?'
+        /// </summary>
+        public static readonly Encoding Ansi = Encoding.GetEncoding(28591);
+
+        /// <summary>
+        /// Reads an ANSI string that ends at its first zero byte
+        /// </summary>
+        public static string GetAnsiString(byte[] data)
+        {
+            var text = Ansi.GetString(data);
+            var end = text.IndexOf('\0');
+            return end < 0 ? text : text.Substring(0, end);
+        }
+
+        /// <summary>
+        /// Writes a string as ANSI in length bytes, padded with zeros
+        /// </summary>
+        public static byte[] WriteAnsi(int length, string value)
+        {
+            var ret = new byte[length];
+            var bytes = Ansi.GetBytes(value ?? "");
+            System.Array.Copy(bytes, ret, System.Math.Min(bytes.Length, length));
+            return ret;
+        }
+
+        /// <summary>
+        /// The four bytes of an IPv4 address: the protocol has no room for another kind
+        /// </summary>
+        public static byte[] IPv4(System.Net.IPAddress address)
+        {
+            if (address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+            {
+                throw new System.ArgumentException("The device takes IPv4 addresses only: " + address);
+            }
+            return address.GetAddressBytes();
         }
 
         /// <summary>

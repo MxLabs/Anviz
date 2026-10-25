@@ -4,29 +4,64 @@ using System;
 namespace Anviz.SDK.Responses
 {
     /// <summary>
-    /// Up to three times of the day the device restarts itself (0x14, 0x15); null is none
+    /// Up to three times of the day the device restarts itself (0x14, 0x15), kept as the BCD
+    /// bytes the device gives, so a setting read is written back the same
     /// </summary>
     public class RebootTimes
     {
-        public TimeSpan?[] Times { get; }
+        public class RebootTime
+        {
+            public byte Hour { get; set; } = 0xFF;
+            public byte Minute { get; set; } = 0xFF;
+            public byte Second { get; set; } = 0xFF;
+
+            /// <summary>
+            /// The time it says; null when it is not set (0xFF)
+            /// </summary>
+            public TimeSpan? Time
+            {
+                get
+                {
+                    if (Hour == 0xFF)
+                    {
+                        return null;
+                    }
+                    return new TimeSpan(Bytes.ReadBcd(Hour), Bytes.ReadBcd(Minute), Bytes.ReadBcd(Second));
+                }
+                set
+                {
+                    if (!value.HasValue)
+                    {
+                        Hour = 0xFF;
+                        Minute = 0xFF;
+                        Second = 0xFF;
+                        return;
+                    }
+                    Hour = Bytes.WriteBcd(value.Value.Hours);
+                    Minute = Bytes.WriteBcd(value.Value.Minutes);
+                    Second = Bytes.WriteBcd(value.Value.Seconds);
+                }
+            }
+        }
+
+        public RebootTime[] Times { get; }
 
         public RebootTimes()
         {
-            Times = new TimeSpan?[3];
+            Times = new[] { new RebootTime(), new RebootTime(), new RebootTime() };
         }
 
         internal RebootTimes(byte[] data)
         {
-            Times = new TimeSpan?[3];
+            Times = new RebootTime[3];
             for (var i = 0; i < 3; i++)
             {
-                var hour = data[i * 3];
-                if (hour == 0xFF)
+                Times[i] = new RebootTime
                 {
-                    continue;
-                }
-                Times[i] = new TimeSpan(Bytes.ReadBcd(hour), Bytes.ReadBcd(data[i * 3 + 1]),
-                    Bytes.ReadBcd(data[i * 3 + 2]));
+                    Hour = data[i * 3],
+                    Minute = data[i * 3 + 1],
+                    Second = data[i * 3 + 2]
+                };
             }
         }
 
@@ -35,17 +70,9 @@ namespace Anviz.SDK.Responses
             var ret = new byte[9];
             for (var i = 0; i < 3; i++)
             {
-                var time = Times[i];
-                if (!time.HasValue)
-                {
-                    ret[i * 3] = 0xFF;
-                    ret[i * 3 + 1] = 0xFF;
-                    ret[i * 3 + 2] = 0xFF;
-                    continue;
-                }
-                ret[i * 3] = Bytes.WriteBcd(time.Value.Hours);
-                ret[i * 3 + 1] = Bytes.WriteBcd(time.Value.Minutes);
-                ret[i * 3 + 2] = Bytes.WriteBcd(time.Value.Seconds);
+                ret[i * 3] = Times[i].Hour;
+                ret[i * 3 + 1] = Times[i].Minute;
+                ret[i * 3 + 2] = Times[i].Second;
             }
             return ret;
         }

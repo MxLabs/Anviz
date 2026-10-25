@@ -57,7 +57,7 @@ namespace Anviz.SDK
             {
                 var offset = 1 + i * 14;
                 Bytes.Write(2, departments[i].Id).CopyTo(data, offset);
-                Bytes.WriteAscii(10, departments[i].Name).CopyTo(data, offset + 2);
+                Bytes.WriteAnsi(10, departments[i].Name).CopyTo(data, offset + 2);
                 Bytes.Write(2, departments[i].ParentId).CopyTo(data, offset + 12);
             }
             await DeviceStream.SendCommand(new AddDepartmentsCommand(DeviceId, data));

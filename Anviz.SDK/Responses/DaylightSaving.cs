@@ -7,9 +7,10 @@
     public class DaylightSaving
     {
         /// <summary>
-        /// A moment of the change: a date (Month, Day) or, by week, the week of the month (1 to 4
-        /// counting from the start, 0x81 and 0x82 the last and the one before) and the day of the
-        /// week (0 Sunday to 6 Saturday); and the time
+        /// A moment of the change: a date (Month, Day) or, by week, the week of the month and the
+        /// day of the week; and the time. The protocol gives the week of the month as 0x01 to
+        /// 0x04 ("previous 1-4 weeks") or 0x81 to 0x82 ("upcoming 1-2 weeks"), and the day of
+        /// the week as 0 Sunday to 6 Saturday
         /// </summary>
         public class Moment
         {

@@ -50,11 +50,11 @@ namespace Anviz.SDK.Responses
         internal byte[] ToArray()
         {
             var ret = new byte[Url != null ? 161 : 57];
-            IP.GetAddressBytes().CopyTo(ret, 0);
-            SubnetMask.GetAddressBytes().CopyTo(ret, 4);
-            DefaultGateway.GetAddressBytes().CopyTo(ret, 8);
+            Bytes.IPv4(IP).CopyTo(ret, 0);
+            Bytes.IPv4(SubnetMask).CopyTo(ret, 4);
+            Bytes.IPv4(DefaultGateway).CopyTo(ret, 8);
             MacAddress.GetAddressBytes().CopyTo(ret, 12);
-            Server.GetAddressBytes().CopyTo(ret, 18);
+            Bytes.IPv4(Server).CopyTo(ret, 18);
             Bytes.Write(2, Port).CopyTo(ret, 22);
             ret[24] = (byte)Mode;
             Bytes.Write(4, DeviceId).CopyTo(ret, 25);
@@ -62,7 +62,7 @@ namespace Anviz.SDK.Responses
             Bytes.WriteAscii(12, Password).CopyTo(ret, 45);
             if (Url != null)
             {
-                (Dns ?? IPAddress.Any).GetAddressBytes().CopyTo(ret, 57);
+                Bytes.IPv4(Dns ?? IPAddress.Any).CopyTo(ret, 57);
                 Bytes.WriteAscii(100, Url).CopyTo(ret, 61);
             }
             return ret;

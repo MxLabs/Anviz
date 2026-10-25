@@ -11,6 +11,10 @@ FEATURES:
 * Administrator cards and password of T5 devices (0x1C, 0x1D)
 * `TcpMode.ClientWithServerUrl`
 
+IMPROVEMENTS:
+* The fields the protocol calls ANSI are read and written as Latin-1, keeping accents
+* `Bytes.Write` says when a value does not fit in its bytes
+
 BUG FIXES:
 * Strings end at their first zero: devices leave bytes of an older value after it (a serial number read as `QWSERF2354234\0m`)
 

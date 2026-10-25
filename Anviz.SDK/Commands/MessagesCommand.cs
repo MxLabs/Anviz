@@ -50,11 +50,16 @@ namespace Anviz.SDK
     public partial class AnvizDevice
     {
         /// <summary>
-        /// Reads the message at an index, 0 to 49
+        /// Reads the message at an index, 0 to 49; null when there is none
         /// </summary>
         public async Task<DeviceMessage> GetMessage(byte index)
         {
+            CheckMessageIndex(index);
             var response = await DeviceStream.SendCommand(new GetMessageCommand(DeviceId, index));
+            if (DeviceMessage.IsEmpty(response.DATA))
+            {
+                return null;
+            }
             return new DeviceMessage(response.DATA);
         }
 
@@ -78,13 +83,11 @@ namespace Anviz.SDK
         }
 
         /// <summary>
-        /// Adds a message; the device keeps it at the first free index. Its text goes in the
-        /// encoding the device keeps messages in, which the device says when asked for one.
+        /// Adds a message; the device keeps it at the first free index, in the encoding the
+        /// message says (UTF-16 unless told otherwise)
         /// </summary>
         public async Task AddMessage(DeviceMessage message)
         {
-            var kept = await DeviceStream.SendCommand(new GetMessageCommand(DeviceId, 0));
-            message.Unicode = kept.DATA.Length > 59;
             await DeviceStream.SendCommand(new AddMessageCommand(DeviceId, message));
         }
 
@@ -93,11 +96,16 @@ namespace Anviz.SDK
         /// </summary>
         public async Task DeleteMessage(byte index)
         {
+            CheckMessageIndex(index);
+            await DeviceStream.SendCommand(new DeleteMessageCommand(DeviceId, index));
+        }
+
+        private static void CheckMessageIndex(byte index)
+        {
             if (index >= DeviceMessage.MAX_MESSAGES)
             {
                 throw new ArgumentOutOfRangeException("index", "Must be within 0 to DeviceMessage.MAX_MESSAGES - 1");
             }
-            await DeviceStream.SendCommand(new DeleteMessageCommand(DeviceId, index));
         }
 
         /// <summary>

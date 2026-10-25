@@ -1,4 +1,5 @@
 ﻿using Anviz.SDK.Utils;
+using System;
 
 namespace Anviz.SDK.Responses
 {
@@ -15,6 +16,10 @@ namespace Anviz.SDK.Responses
 
         public WifiNetwork(byte number)
         {
+            if (number < 1 || number > MAX_NETWORKS)
+            {
+                throw new ArgumentOutOfRangeException("number", "Must be within 1 to WifiNetwork.MAX_NETWORKS");
+            }
             Number = number;
             Ssid = "";
             Password = "";
