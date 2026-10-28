@@ -8,6 +8,18 @@ BREAKING CHANGES:
 * `GetFaceTemplate` and `SetFaceTemplate` use backup code 11, the face, as CrossChex does: codes 1 to 10 are the fingers, so 1 was the first fingerprint. Face-only devices with old firmware accepted 1; there is no report yet of how they take 11
 * `SetFaceTemplate` sends the template with its length instead of padding it with zeros to 15360 bytes. Newer firmware has 2056-byte templates and answered `RET: FAIL` (#53)
 
+FEATURES:
+* UDP search and network setting of devices (`AnvizDiscovery`, 0x02, 0x03)
+* `UserInfo.IsAdmin` and `ClearAdminFlags` (0x3D)
+* Special state (0x2F), capacity (0x5D), extended info (0x7A, 0x7B)
+* Daylight saving (0x1A, 0x1B), server URL and DNS (0x0A, 0x0B), reboot times (0x14, 0x15)
+* Device configuration 3 (0x34, 0x35) and 4 (0x36)
+* Group time zones (0x52, 0x53), attendance statuses (0x5A, 0x5B), customized statuses (0x70, 0x71), status switching (0x20, 0x21)
+* Information code (0x4A, 0x4B), languages (0x18, 0x19), WiFi networks (0x6E, 0x6F)
+* Messages (0x56 to 0x59), personnel changes (0x64, 0x1E), user exists (0x0C), departments (0x61, 0x62)
+* Administrator cards and password of T5 devices (0x1C, 0x1D)
+* `TcpMode.ClientWithServerUrl`
+
 IMPROVEMENTS:
 * Tests with a fake device, run on every pull request
 * The solution is `Anviz.slnx`

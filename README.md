@@ -40,6 +40,21 @@ Features
 - Automatically answer ping requests
 - Get/set TimeZone information
 - Get/set Schedule Bells
+- Find devices and set their network over UDP broadcast, as CrossChex does
+- Know and clear the administrator flag of users
+- Get the device special state (door, sensor, lock) and its capacity
+- Get/set the vendor's extended information
+- Get/set daylight saving time
+- Get/set the server URL and DNS of client mode
+- Get/set device configuration 3 (Wiegand, connection password requirement); get configuration 4
+- Get/set access groups' time zones
+- Get/set attendance statuses, by index or customized by name, and their automatic switching
+- Get/set the information code the device shows
+- Get, add and delete messages shown to users
+- Get/set display languages, WiFi networks and reboot times (models that support them)
+- Get and clear personnel changes, check whether a user exists (models that support them)
+- Add and delete departments (OA1000)
+- Get/set administrator cards (T5A) and password (T50)
 
 Tested devices
 --------
@@ -51,3 +66,4 @@ Tested devices
  - WF30 Pro
  - A350C
  - M7
+ - A380
