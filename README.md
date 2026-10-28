@@ -41,6 +41,7 @@ Features
 - Get/set TimeZone information
 - Get/set Schedule Bells
 - Synchronize employees and fingerprints on many devices in parallel, sending only what changed
+- `AnvizServer`: many devices at once, by serial number, listening for devices in client mode and/or connecting to devices in server mode, with reconnection, heartbeat and events
 - Find devices and set their network over UDP broadcast, as CrossChex does
 - Know and clear the administrator flag of users
 - Get the device special state (door, sensor, lock) and its capacity

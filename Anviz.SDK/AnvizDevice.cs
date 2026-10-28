@@ -30,6 +30,12 @@ namespace Anviz.SDK
             set => DeviceStream.PingSilence = value;
         }
 
+        internal event EventHandler Activity
+        {
+            add => DeviceStream.Activity += value;
+            remove => DeviceStream.Activity -= value;
+        }
+
         public AnvizDevice(TcpClient socket)
         {
             DeviceStream = new AnvizStream(socket);

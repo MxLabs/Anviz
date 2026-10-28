@@ -54,6 +54,10 @@ namespace Anviz.SDK
         public event EventHandler<Response> ReceivedPacket;
         public event EventHandler<Exception> DeviceError;
         public event EventHandler Disconnected;
+        /// <summary>
+        /// Every packet received, answers included
+        /// </summary>
+        internal event EventHandler Activity;
 
         public bool Connected => !Volatile.Read(ref Closed);
 
@@ -139,6 +143,7 @@ namespace Anviz.SDK
                     break;
                 }
                 Interlocked.Exchange(ref LastReceived, DateTime.UtcNow.Ticks);
+                Activity?.Invoke(this, EventArgs.Empty);
                 var pending = Volatile.Read(ref Pending);
                 if (response.ResponseCode == 0x7F)
                 {
