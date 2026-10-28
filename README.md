@@ -66,3 +66,4 @@ Tested devices
  - WF30 Pro
  - A350C
  - M7
+ - A380
