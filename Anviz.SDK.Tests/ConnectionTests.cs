@@ -43,6 +43,50 @@ namespace Anviz.SDK.Tests
         }
 
         [Fact]
+        public async Task DisposeFromTheDisconnectedHandlerAndTwiceIsSafe()
+        {
+            await using var fake = new FakeDevice();
+            var device = await fake.Connect();
+            var disconnected = new TaskCompletionSource();
+            device.Disconnected += (s, e) =>
+            {
+                device.Dispose();
+                disconnected.TrySetResult();
+            };
+
+            fake.Disconnect();
+
+            await disconnected.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            device.Dispose();
+        }
+
+        [Fact]
+        public async Task GarbageFromThePeerClosesTheConnection()
+        {
+            // an HTTP server, or a scanner, on the device port
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+            _ = Task.Run(async () =>
+            {
+                using var peer = await listener.AcceptTcpClientAsync();
+                var stream = peer.GetStream();
+                await stream.ReadAsync(new byte[64]);
+                await stream.WriteAsync("HTTP/1.1 400 Bad Request\r\n\r\n"u8.ToArray());
+                await Task.Delay(1000);
+            });
+            try
+            {
+                var ex = await Assert.ThrowsAsync<Exception>(() => new AnvizManager().Connect("127.0.0.1", port));
+                Assert.Equal("Device connection lost.", ex.Message);
+            }
+            finally
+            {
+                listener.Stop();
+            }
+        }
+
+        [Fact]
         public async Task FakeDeviceInClientModeConnectsToTheManager()
         {
             var port = FreePort();

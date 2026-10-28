@@ -28,6 +28,7 @@ namespace Anviz.SDK
         private PendingCommand Pending;
         private bool Closed;
         private int DisconnectedRaised;
+        private int Disposed;
 
         private class PendingCommand
         {
@@ -181,12 +182,19 @@ namespace Anviz.SDK
 
         public void Dispose()
         {
+            if (Interlocked.Exchange(ref Disposed, 1) == 1)
+            {
+                return;
+            }
             CancellationTokenSource.Cancel();
-            ReceiverThread.Join();
+            // a Disconnected handler can dispose the device from the receiver thread itself
+            if (Thread.CurrentThread != ReceiverThread)
+            {
+                ReceiverThread.Join();
+            }
             DeviceStream.Close();
             DeviceStream.Dispose();
             DeviceSocket.Close();
-            CancellationTokenSource.Dispose();
         }
     }
 }
