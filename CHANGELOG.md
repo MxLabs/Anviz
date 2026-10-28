@@ -5,6 +5,8 @@ BREAKING CHANGES:
 * When the device answers a command with an error (RET other than success) the command throws `AnvizDeviceException`, with the `ResponseStatus` in `Status`, and the connection stays open. Before, it threw `Exception("RET: ...")` from the receiver and closed the connection, so the command failed with "Device connection lost." and the next ones with "Device is not connected."
 * `UserInfo.Name` throws `ArgumentOutOfRangeException` for names longer than 10 characters, which overwrote the fields after the name or threw when writing. A null name is an empty name
 * `EnrollFingerprint` throws `ArgumentOutOfRangeException` when `verifyCount` is not 1 or 2: the protocol enrolls at most twice (#91)
+* `GetFaceTemplate` and `SetFaceTemplate` use backup code 11, the face, as CrossChex does: codes 1 to 10 are the fingers, so 1 was the first fingerprint. Face-only devices with old firmware accepted 1; there is no report yet of how they take 11
+* `SetFaceTemplate` sends the template with its length instead of padding it with zeros to 15360 bytes. Newer firmware has 2056-byte templates and answered `RET: FAIL` (#53)
 
 FEATURES:
 * UDP search and network setting of devices (`AnvizDiscovery`, 0x02, 0x03)

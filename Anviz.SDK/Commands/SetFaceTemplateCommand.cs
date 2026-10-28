@@ -9,9 +9,9 @@ namespace Anviz.SDK.Commands
         private const byte SET_FACETEMPLATE = 0x45;
         public SetFaceTemplateCommand(ulong deviceId, ulong employeeID, byte[] template) : base(deviceId)
         {
-            var payload = new byte[15366];
+            var payload = new byte[6 + template.Length];
             Bytes.Write(5, employeeID).CopyTo(payload, 0);
-            payload[5] = 1;
+            payload[5] = GetFaceTemplateCommand.FACE_BACKUP_CODE;
             template.CopyTo(payload, 6);
             BuildPayload(SET_FACETEMPLATE, payload);
         }
