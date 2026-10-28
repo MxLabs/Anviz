@@ -67,3 +67,8 @@ Tested devices
  - A350C
  - M7
  - A380
+
+Contributing
+--------
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branches, tests and how releases are published.
