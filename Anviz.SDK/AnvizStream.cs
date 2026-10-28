@@ -27,6 +27,7 @@ namespace Anviz.SDK
         private readonly SemaphoreSlim WriteLock = new SemaphoreSlim(1, 1);
         private PendingCommand Pending;
         private bool Closed;
+        private int DisconnectedRaised;
 
         private class PendingCommand
         {
@@ -42,6 +43,9 @@ namespace Anviz.SDK
 
         public event EventHandler<Response> ReceivedPacket;
         public event EventHandler<Exception> DeviceError;
+        public event EventHandler Disconnected;
+
+        public bool Connected => !Volatile.Read(ref Closed);
 
         public AnvizStream(TcpClient socket)
         {
@@ -74,9 +78,6 @@ namespace Anviz.SDK
                 }
                 if (response == null)
                 {
-                    DeviceSocket.Close();
-                    Volatile.Write(ref Closed, true);
-                    Interlocked.Exchange(ref Pending, null)?.Result.TrySetResult(null);
                     break;
                 }
                 var pending = Volatile.Read(ref Pending);
@@ -101,6 +102,14 @@ namespace Anviz.SDK
                 {
                     ReceivedPacket?.Invoke(this, response);
                 }
+            }
+            // closed by the device, by a timeout or by Dispose: in every case nothing is read anymore
+            DeviceSocket.Close();
+            Volatile.Write(ref Closed, true);
+            Interlocked.Exchange(ref Pending, null)?.Result.TrySetResult(null);
+            if (Interlocked.Exchange(ref DisconnectedRaised, 1) == 0)
+            {
+                Disconnected?.Invoke(this, EventArgs.Empty);
             }
         }
 

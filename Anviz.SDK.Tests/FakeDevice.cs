@@ -18,22 +18,30 @@ namespace Anviz.SDK.Tests
     }
 
     /// <summary>
-    /// A device on localhost that speaks the TC_B protocol, to test the library without hardware
+    /// A device on localhost that speaks the TC_B protocol, to test the library without hardware.
+    /// By default it listens, as a device in server mode, and takes a new connection in place of
+    /// the previous one; <see cref="ConnectTo"/> makes one that connects, as a device in client mode
     /// </summary>
     public sealed class FakeDevice : IAsyncDisposable
     {
         public const ulong DEVICE_ID = 1;
 
-        private readonly TcpListener listener;
+        private readonly TcpListener? listener;
         private readonly SemaphoreSlim writeLock = new SemaphoreSlim(1, 1);
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
-        private readonly TaskCompletionSource<NetworkStream> connected = new TaskCompletionSource<NetworkStream>();
+        private TaskCompletionSource<NetworkStream> connected = NewConnected();
         private TcpClient? client;
+        private int connections;
 
-        public int Port => ((IPEndPoint)listener.LocalEndpoint).Port;
+        public int Port => ((IPEndPoint)listener!.LocalEndpoint).Port;
 
         /// <summary>
-        /// Answers a command (code and data). The default answers the device type asked on connection
+        /// The serial number answered to 0x24
+        /// </summary>
+        public string Serial { get; set; } = "FAKE0001";
+
+        /// <summary>
+        /// Answers a command (code and data). The default is <see cref="DefaultReply"/>
         /// </summary>
         public Func<byte, byte[], Task<Reply?>> Handler { get; set; }
 
@@ -42,6 +50,11 @@ namespace Anviz.SDK.Tests
         /// </summary>
         public bool SplitAnswers { get; set; }
 
+        /// <summary>
+        /// How many connections the fake device had
+        /// </summary>
+        public int Connections => Volatile.Read(ref connections);
+
         public ConcurrentQueue<(byte Command, byte[] Data)> Received { get; } = new ConcurrentQueue<(byte, byte[])>();
 
         /// <summary>
@@ -49,20 +62,63 @@ namespace Anviz.SDK.Tests
         /// </summary>
         public ConcurrentQueue<byte[]> ReceivedPackets { get; } = new ConcurrentQueue<byte[]>();
 
+        /// <summary>
+        /// A fake device in server mode, listening on a free port of localhost
+        /// </summary>
         public FakeDevice()
         {
             Handler = (cmd, data) => Task.FromResult(DefaultReply(cmd));
             listener = new TcpListener(IPAddress.Loopback, 0);
             listener.Start();
-            _ = Task.Run(Serve);
+            _ = Task.Run(AcceptLoop);
         }
 
-        public static Reply? DefaultReply(byte cmd) => cmd == 0x48 ? Reply.Ok("W1\0\0\0\0\0\0") : null;
+        private FakeDevice(bool clientMode)
+        {
+            Handler = (cmd, data) => Task.FromResult(DefaultReply(cmd));
+        }
+
+        /// <summary>
+        /// A fake device in client mode, connecting to a server on localhost
+        /// </summary>
+        public static FakeDevice ConnectTo(int port, string serial = "FAKE0001")
+        {
+            var fake = new FakeDevice(true) { Serial = serial };
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var tcp = new TcpClient();
+                    await tcp.ConnectAsync(IPAddress.Loopback, port, fake.cts.Token);
+                    await fake.Serve(tcp);
+                }
+                catch (Exception)
+                {
+                    // server not listening or connection closed
+                }
+            });
+            return fake;
+        }
+
+        /// <summary>
+        /// Answers the device type and the serial number, which the library asks on connection
+        /// </summary>
+        public Reply? DefaultReply(byte cmd) => cmd switch
+        {
+            0x48 => Reply.Ok("W1\0\0\0\0\0\0"),
+            0x24 => Reply.Ok(Serial),
+            _ => null,
+        };
 
         /// <summary>
         /// Connects an AnvizDevice to this fake device
         /// </summary>
         public Task<AnvizDevice> Connect() => new AnvizManager().Connect("127.0.0.1", Port);
+
+        /// <summary>
+        /// Waits until the fake device has a connection
+        /// </summary>
+        public Task WaitConnected() => connected.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
         /// <summary>
         /// Sends a packet the device starts by itself, like the ping (0x7F)
@@ -77,14 +133,41 @@ namespace Anviz.SDK.Tests
         /// </summary>
         public void Disconnect() => client?.Close();
 
-        private async Task Serve()
+        private static TaskCompletionSource<NetworkStream> NewConnected() =>
+            new TaskCompletionSource<NetworkStream>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        private async Task AcceptLoop()
+        {
+            while (!cts.IsCancellationRequested)
+            {
+                TcpClient tcp;
+                try
+                {
+                    tcp = await listener!.AcceptTcpClientAsync(cts.Token);
+                }
+                catch (Exception)
+                {
+                    return;
+                }
+                // a new connection takes the place of the previous one
+                client?.Close();
+                _ = Serve(tcp);
+            }
+        }
+
+        private async Task Serve(TcpClient tcp)
         {
             try
             {
-                client = await listener.AcceptTcpClientAsync(cts.Token);
-                client.NoDelay = true;
-                var stream = client.GetStream();
-                connected.SetResult(stream);
+                tcp.NoDelay = true;
+                client = tcp;
+                var stream = tcp.GetStream();
+                if (!connected.TrySetResult(stream))
+                {
+                    connected = NewConnected();
+                    connected.SetResult(stream);
+                }
+                Interlocked.Increment(ref connections);
                 while (!cts.IsCancellationRequested)
                 {
                     // STX + CH + CMD, then RET when it is an answer (the pong), then LEN
@@ -179,7 +262,7 @@ namespace Anviz.SDK.Tests
         {
             cts.Cancel();
             client?.Close();
-            listener.Stop();
+            listener?.Stop();
             await Task.CompletedTask;
         }
     }

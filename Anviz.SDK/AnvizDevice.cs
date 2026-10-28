@@ -16,6 +16,14 @@ namespace Anviz.SDK
         public event EventHandler<Record> ReceivedRecord;
         public event EventHandler<Exception> DeviceError;
 
+        /// <summary>
+        /// Raised once when the connection ends: closed by the device, lost, after a timeout or by
+        /// Dispose. Check <see cref="Connected"/> after subscribing, the connection may be already over
+        /// </summary>
+        public event EventHandler Disconnected;
+
+        public bool Connected => DeviceStream.Connected;
+
         public AnvizDevice(TcpClient socket)
         {
             DeviceStream = new AnvizStream(socket);
@@ -37,6 +45,10 @@ namespace Anviz.SDK
             DeviceStream.DeviceError += (s, e) =>
             {
                 DeviceError?.Invoke(this, e);
+            };
+            DeviceStream.Disconnected += (s, e) =>
+            {
+                Disconnected?.Invoke(this, EventArgs.Empty);
             };
         }
 

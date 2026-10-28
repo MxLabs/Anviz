@@ -24,7 +24,7 @@ namespace Anviz.SDK.Tests
             var capture = Capture("issue53-set-face-template.hex");
             var template = capture[14..^2]; // after STX, CH, CMD, LEN, user code and backup code; before CRC
             await using var fake = new FakeDevice();
-            fake.Handler = (cmd, data) => Task.FromResult(cmd == SET_FACETEMPLATE ? Reply.Ok(Array.Empty<byte>()) : FakeDevice.DefaultReply(cmd));
+            fake.Handler = (cmd, data) => Task.FromResult(cmd == SET_FACETEMPLATE ? Reply.Ok(Array.Empty<byte>()) : fake.DefaultReply(cmd));
             using var device = await fake.Connect();
 
             await device.SetFaceTemplate(1, template);
@@ -37,7 +37,7 @@ namespace Anviz.SDK.Tests
         {
             var template = new byte[2056];
             await using var fake = new FakeDevice();
-            fake.Handler = (cmd, data) => Task.FromResult(cmd == GET_FACETEMPLATE ? Reply.Ok(template) : FakeDevice.DefaultReply(cmd));
+            fake.Handler = (cmd, data) => Task.FromResult(cmd == GET_FACETEMPLATE ? Reply.Ok(template) : fake.DefaultReply(cmd));
             using var device = await fake.Connect();
 
             Assert.Equal(template, await device.GetFaceTemplate(1));
