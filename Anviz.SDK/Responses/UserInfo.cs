@@ -1,4 +1,5 @@
 ﻿using Anviz.SDK.Utils;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,11 +9,29 @@ namespace Anviz.SDK.Responses
     {
         internal const int RECORD_LENGTH = 40;
         internal const int MAX_RECORDS = 8;
+        private const int NAME_LENGTH = 20; // bytes of UTF-16: 10 characters
 
         public ulong Id { get; set; }
         public ulong? Password { get; set; }
         public ulong? Card { get; set; }
-        public string Name { get; set; }
+        private string name = "";
+
+        /// <summary>
+        /// At most 10 characters: the device keeps 20 bytes of UTF-16
+        /// </summary>
+        public string Name
+        {
+            get => name;
+            set
+            {
+                value = value ?? "";
+                if (Encoding.BigEndianUnicode.GetByteCount(value) > NAME_LENGTH)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(Name), value, $"The name is at most {NAME_LENGTH / 2} characters");
+                }
+                name = value;
+            }
+        }
         public List<Finger> EnrolledFingerprints { get; }
         public byte Department { get; set; }
         public byte Group { get; set; }
@@ -20,16 +39,6 @@ namespace Anviz.SDK.Responses
         public byte PWDH8 { get; set; }
         public byte Keep { get; set; }
         public byte Message { get; set; }
-
-        /// <summary>
-        /// Whether the user is an administrator of the device: bits 7-6 of the special info
-        /// byte (<see cref="Message"/>) are 3 for an administrator and 1 for a normal user
-        /// </summary>
-        public bool IsAdmin
-        {
-            get => (Message >> 6) == 3;
-            set => Message = (byte)((Message & 0x3F) | (value ? 0xC0 : 0x40));
-        }
 
         internal UserInfo(byte[] data, int offset)
         {
@@ -52,7 +61,7 @@ namespace Anviz.SDK.Responses
             {
                 Card = Bytes.Read(card);
             }
-            Name = Bytes.GetUnicodeString(Bytes.Split(data, offset + 12, 20));
+            Name = Bytes.GetUnicodeString(Bytes.Split(data, offset + 12, NAME_LENGTH));
             Department = data[offset + 32];
             Group = data[offset + 33];
             Mode = data[offset + 34];
@@ -78,7 +87,7 @@ namespace Anviz.SDK.Responses
                 ret[10] = 0xFF;
                 ret[11] = 0xFF;
             }
-            Encoding.BigEndianUnicode.GetBytes(Name).CopyTo(ret, 12);
+            Bytes.WriteUnicode(NAME_LENGTH, Name).CopyTo(ret, 12);
             ret[32] = Department;
             ret[33] = Group;
             ret[34] = Mode;

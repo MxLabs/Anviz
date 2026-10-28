@@ -7,8 +7,7 @@ namespace Anviz.SDK.Responses
     public enum TcpMode
     {
         Server = 0,
-        Client = 1,
-        ClientWithServerUrl = 2
+        Client = 1
     }
 
     public class TcpParameters
