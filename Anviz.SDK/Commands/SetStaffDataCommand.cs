@@ -35,6 +35,8 @@ namespace Anviz.SDK
 
         public async Task SetEmployeesData(List<UserInfo> users)
         {
+            // the command takes the users it sends out of the list: work on a copy of the caller's
+            users = new List<UserInfo>(users);
             while (users.Count > 0)
             {
                 await DeviceStream.SendCommand(new SetStaffDataCommand(DeviceId, users));

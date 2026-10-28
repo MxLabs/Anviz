@@ -40,6 +40,7 @@ Features
 - Automatically answer ping requests
 - Get/set TimeZone information
 - Get/set Schedule Bells
+- Synchronize employees and fingerprints on many devices in parallel, sending only what changed
 - Find devices and set their network over UDP broadcast, as CrossChex does
 - Know and clear the administrator flag of users
 - Get the device special state (door, sensor, lock) and its capacity
