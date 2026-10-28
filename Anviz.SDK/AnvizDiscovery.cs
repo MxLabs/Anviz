@@ -55,7 +55,7 @@ namespace Anviz.SDK
             }
             if (answers[0].Ret != 0)
             {
-                throw new Exception("RET: " + answers[0].Ret);
+                throw new AnvizDeviceException((ResponseStatus)answers[0].Ret);
             }
         }
 
