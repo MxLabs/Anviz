@@ -12,7 +12,7 @@ namespace Anviz.SDK.Tests
         public async Task ReadsAnswersSplitInSingleBytes()
         {
             await using var fake = new FakeDevice { SplitAnswers = true };
-            fake.Handler = (cmd, data) => Task.FromResult(cmd == GET_DEVICE_SN ? Reply.Ok("SN123") : FakeDevice.DefaultReply(cmd));
+            fake.Handler = (cmd, data) => Task.FromResult(cmd == GET_DEVICE_SN ? Reply.Ok("SN123") : fake.DefaultReply(cmd));
             using var device = await fake.Connect();
 
             Assert.Equal("SN123", await device.GetDeviceSN());
@@ -22,7 +22,7 @@ namespace Anviz.SDK.Tests
         public async Task GetsAnswersThatArriveImmediately()
         {
             await using var fake = new FakeDevice();
-            fake.Handler = (cmd, data) => Task.FromResult(cmd == GET_DEVICE_SN ? Reply.Ok("SN123") : FakeDevice.DefaultReply(cmd));
+            fake.Handler = (cmd, data) => Task.FromResult(cmd == GET_DEVICE_SN ? Reply.Ok("SN123") : fake.DefaultReply(cmd));
             using var device = await fake.Connect();
 
             for (var i = 0; i < 1000; i++)
@@ -41,7 +41,7 @@ namespace Anviz.SDK.Tests
             {
                 if (cmd != GET_DEVICE_SN)
                 {
-                    return FakeDevice.DefaultReply(cmd);
+                    return fake.DefaultReply(cmd);
                 }
                 var now = Interlocked.Increment(ref inFlight);
                 InterlockedMax(ref maxInFlight, now);
@@ -65,7 +65,7 @@ namespace Anviz.SDK.Tests
             {
                 GET_DATETIME => Reply.Error(ResponseStatus.Fail),
                 GET_DEVICE_SN => Reply.Ok("SN123"),
-                _ => FakeDevice.DefaultReply(cmd),
+                _ => fake.DefaultReply(cmd),
             });
             using var device = await fake.Connect();
 
@@ -79,7 +79,7 @@ namespace Anviz.SDK.Tests
         {
             var template = Enumerable.Range(0, 20000).Select(i => (byte)i).ToArray();
             await using var fake = new FakeDevice();
-            fake.Handler = (cmd, data) => Task.FromResult(cmd == GET_FACETEMPLATE ? Reply.Ok(template) : FakeDevice.DefaultReply(cmd));
+            fake.Handler = (cmd, data) => Task.FromResult(cmd == GET_FACETEMPLATE ? Reply.Ok(template) : fake.DefaultReply(cmd));
             using var device = await fake.Connect();
 
             Assert.Equal(template, await device.GetFaceTemplate(1));
@@ -110,7 +110,7 @@ namespace Anviz.SDK.Tests
                     fake.Disconnect();
                     return Task.FromResult<Reply?>(null);
                 }
-                return Task.FromResult(FakeDevice.DefaultReply(cmd));
+                return Task.FromResult(fake.DefaultReply(cmd));
             };
             using var device = await fake.Connect();
 

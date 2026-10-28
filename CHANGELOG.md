@@ -9,6 +9,7 @@ BREAKING CHANGES:
 * `SetFaceTemplate` sends the template with its length instead of padding it with zeros to 15360 bytes. Newer firmware has 2056-byte templates and answered `RET: FAIL` (#53)
 
 FEATURES:
+* `AnvizDevice.Disconnected`, raised once when the connection ends (closed by the device, lost, after a timeout or by `Dispose`), and `AnvizDevice.Connected`
 * UDP search and network setting of devices (`AnvizDiscovery`, 0x02, 0x03)
 * `UserInfo.IsAdmin` and `ClearAdminFlags` (0x3D)
 * Special state (0x2F), capacity (0x5D), extended info (0x7A, 0x7B)

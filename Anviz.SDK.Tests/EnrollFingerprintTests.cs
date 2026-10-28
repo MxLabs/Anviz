@@ -25,7 +25,7 @@ namespace Anviz.SDK.Tests
             {
                 ENROLL_FINGERPRINT => Reply.Ok(Array.Empty<byte>()),
                 GET_FPTEMPLATE => Reply.Ok(template),
-                _ => FakeDevice.DefaultReply(cmd),
+                _ => fake.DefaultReply(cmd),
             });
             using var device = await fake.Connect();
 
