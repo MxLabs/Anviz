@@ -71,7 +71,7 @@ namespace Anviz.SDK.Tests
             {
                 using var peer = await listener.AcceptTcpClientAsync();
                 var stream = peer.GetStream();
-                await stream.ReadAsync(new byte[64]);
+                Assert.True(await stream.ReadAsync(new byte[64]) > 0); // the handshake command
                 await stream.WriteAsync("HTTP/1.1 400 Bad Request\r\n\r\n"u8.ToArray());
                 await Task.Delay(1000);
             });
