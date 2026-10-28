@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Anviz.SDK.Tests/Anviz.SDK.Tests.csproj" />
+  <Project Path="Anviz.SDK/Anviz.SDK.csproj" />
+  <Project Path="Sample/Sample.csproj" />
+</Solution>

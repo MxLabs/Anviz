@@ -23,11 +23,15 @@ namespace Anviz.SDK
 {
     public partial class AnvizDevice
     {
+        /// <summary>
+        /// Enrolls a fingerprint on the device and returns its template
+        /// </summary>
+        /// <param name="verifyCount">How many times the user puts the finger: 1 or 2, the protocol has no more</param>
         public async Task<byte[]> EnrollFingerprint(ulong employeeID, int verifyCount = 2)
         {
-            if (verifyCount < 1)
+            if (verifyCount < 1 || verifyCount > 2)
             {
-                throw new ArgumentException("verifyCount should be at least 1");
+                throw new ArgumentOutOfRangeException(nameof(verifyCount), verifyCount, "verifyCount is 1 or 2");
             }
             var first = true;
             while (verifyCount-- > 0)

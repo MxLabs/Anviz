@@ -2,11 +2,20 @@
 BREAKING CHANGES:
 
 * `Bytes.Write` throws `ArgumentOutOfRangeException` when a value does not fit in its bytes, instead of silently truncating it. It is used for employee IDs (5 bytes), cards (4 bytes), the amount of `ClearRecords` (3 bytes), `SetDeviceID`, `AdvancedSettings`, `TcpParameters` and `Record`
+* When the device answers a command with an error (RET other than success) the command throws `AnvizDeviceException`, with the `ResponseStatus` in `Status`, and the connection stays open. Before, it threw `Exception("RET: ...")` from the receiver and closed the connection, so the command failed with "Device connection lost." and the next ones with "Device is not connected."
+* `UserInfo.Name` throws `ArgumentOutOfRangeException` for names longer than 10 characters, which overwrote the fields after the name or threw when writing. A null name is an empty name
+* `EnrollFingerprint` throws `ArgumentOutOfRangeException` when `verifyCount` is not 1 or 2: the protocol enrolls at most twice (#91)
 
 IMPROVEMENTS:
+* Tests with a fake device, run on every pull request
+* The solution is `Anviz.slnx`
 * String helpers to write ASCII, UTF-16 and ANSI (Latin-1) fields, and BCD and IPv4 helpers
 
 BUG FIXES:
+* An answer arriving before the library started waiting for it was lost, ending in "Device timeout waiting response." and a closed connection (likely #86)
+* Commands sent at the same time from several threads could take each other's answer: they are now sent one at a time
+* The pong to the device ping could be written in the middle of a command
+* Packets split by TCP in more reads, or bigger than 16000 bytes, closed the connection
 * Strings end at their first zero: devices leave bytes of an older value after it (a serial number read as `QWSERF2354234\0m`)
 
 ## v2.0.18

@@ -32,6 +32,9 @@ jobs:
         dotnet-version: 10.0.x
     - name: Restore dependencies
       run: dotnet restore
+
+    - name: Test
+      run: dotnet test --no-restore
       
     - name: Publishing project
       run: dotnet publish ${{ env.ProjectPath }} --no-restore

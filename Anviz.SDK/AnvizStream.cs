@@ -16,8 +16,29 @@ namespace Anviz.SDK
         private readonly Thread ReceiverThread;
         private readonly CancellationTokenSource CancellationTokenSource;
 
-        private byte ResponseCode = 0;
-        private TaskCompletionSource<Response> taskEmitter;
+        /// <summary>
+        /// One command at a time: the device answers with the command code only, so two
+        /// commands waiting at the same time could not be told apart
+        /// </summary>
+        private readonly SemaphoreSlim CommandLock = new SemaphoreSlim(1, 1);
+        /// <summary>
+        /// Commands and the pong of the receiver thread write to the same stream
+        /// </summary>
+        private readonly SemaphoreSlim WriteLock = new SemaphoreSlim(1, 1);
+        private PendingCommand Pending;
+        private bool Closed;
+
+        private class PendingCommand
+        {
+            public byte ResponseCode { get; }
+            public TaskCompletionSource<Response> Result { get; } =
+                new TaskCompletionSource<Response>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            public PendingCommand(byte responseCode)
+            {
+                ResponseCode = responseCode;
+            }
+        }
 
         public event EventHandler<Response> ReceivedPacket;
         public event EventHandler<Exception> DeviceError;
@@ -25,7 +46,6 @@ namespace Anviz.SDK
         public AnvizStream(TcpClient socket)
         {
             CancellationTokenSource = new CancellationTokenSource();
-            taskEmitter = new TaskCompletionSource<Response>();
             DeviceSocket = socket;
             DeviceStream = socket.GetStream();
             DeviceSocket.ReceiveTimeout = DEVICE_TIMEOUT;
@@ -55,18 +75,27 @@ namespace Anviz.SDK
                 if (response == null)
                 {
                     DeviceSocket.Close();
-                    taskEmitter.TrySetResult(null);
+                    Volatile.Write(ref Closed, true);
+                    Interlocked.Exchange(ref Pending, null)?.Result.TrySetResult(null);
                     break;
                 }
+                var pending = Volatile.Read(ref Pending);
                 if (response.ResponseCode == 0x7F)
                 {
-                    await new PongCommand(response.DeviceID).Send(DeviceStream);
+                    try
+                    {
+                        await Write(new PongCommand(response.DeviceID));
+                    }
+                    catch (Exception ex)
+                    {
+                        DeviceError?.Invoke(this, ex);
+                    }
                     ReceivedPacket?.Invoke(this, response);
                 }
-                else if (response.ResponseCode == ResponseCode)
+                else if (pending != null && response.ResponseCode == pending.ResponseCode
+                    && Interlocked.CompareExchange(ref Pending, null, pending) == pending)
                 {
-                    ResponseCode = 0;
-                    taskEmitter.TrySetResult(response);
+                    pending.Result.TrySetResult(response);
                 }
                 else
                 {
@@ -75,29 +104,70 @@ namespace Anviz.SDK
             }
         }
 
+        private async Task Write(Command cmd)
+        {
+            await WriteLock.WaitAsync();
+            try
+            {
+                await cmd.Send(DeviceStream);
+            }
+            finally
+            {
+                WriteLock.Release();
+            }
+        }
+
         public async Task<Response> SendCommand(Command cmd)
         {
-            if (!DeviceSocket.Connected)
+            await CommandLock.WaitAsync();
+            PendingCommand pending = null;
+            try
             {
-                throw new Exception("Device is not connected.");
-            }
-            ResponseCode = cmd.ResponseCode;
-            await cmd.Send(DeviceStream);
-            taskEmitter = new TaskCompletionSource<Response>();
-            if (await Task.WhenAny(taskEmitter.Task, Task.Delay(DEVICE_TIMEOUT)) != taskEmitter.Task)
-            {
-                if (DeviceSocket.Connected)
+                if (!DeviceSocket.Connected)
                 {
-                    DeviceSocket.Close();
+                    throw new Exception("Device is not connected.");
                 }
-                throw new Exception("Device timeout waiting response.");
+                // waiting before sending: the answer can arrive before Send returns
+                pending = new PendingCommand(cmd.ResponseCode);
+                Volatile.Write(ref Pending, pending);
+                if (Volatile.Read(ref Closed))
+                {
+                    // the receiver stopped after the check above, it will not answer
+                    throw new Exception("Device is not connected.");
+                }
+                await Write(cmd);
+                using (var timeout = new CancellationTokenSource())
+                {
+                    if (await Task.WhenAny(pending.Result.Task, Task.Delay(DEVICE_TIMEOUT, timeout.Token)) != pending.Result.Task)
+                    {
+                        // a late answer would be taken for the one of the next command
+                        if (DeviceSocket.Connected)
+                        {
+                            DeviceSocket.Close();
+                        }
+                        throw new Exception("Device timeout waiting response.");
+                    }
+                    timeout.Cancel();
+                }
+                var result = await pending.Result.Task;
+                if (result == null)
+                {
+                    throw new Exception("Device connection lost.");
+                }
+                if (result.Status != ResponseStatus.Success)
+                {
+                    throw new AnvizDeviceException(result.Status);
+                }
+                return result;
             }
-            var result = await taskEmitter.Task;
-            if (result == null)
+            finally
             {
-                throw new Exception("Device connection lost.");
+                if (pending != null)
+                {
+                    Interlocked.CompareExchange(ref Pending, null, pending);
+                }
+                CommandLock.Release();
             }
-            return result;
         }
 
         public void Dispose()
