@@ -44,6 +44,11 @@ namespace Anviz.SDK.Tests
 
         public ConcurrentQueue<(byte Command, byte[] Data)> Received { get; } = new ConcurrentQueue<(byte, byte[])>();
 
+        /// <summary>
+        /// The whole packets received, to compare them with captures of real traffic
+        /// </summary>
+        public ConcurrentQueue<byte[]> ReceivedPackets { get; } = new ConcurrentQueue<byte[]>();
+
         public FakeDevice()
         {
             Handler = (cmd, data) => Task.FromResult(DefaultReply(cmd));
@@ -88,8 +93,9 @@ namespace Anviz.SDK.Tests
                     var lenBytes = await Read(stream, cmd >= 0x80 ? 3 : 2);
                     var len = (lenBytes[^2] << 8) | lenBytes[^1];
                     var data = await Read(stream, len);
-                    await Read(stream, 2); // CRC
+                    var crc = await Read(stream, 2);
                     Received.Enqueue((cmd, data));
+                    ReceivedPackets.Enqueue(head.Concat(lenBytes).Concat(data).Concat(crc).ToArray());
                     if (cmd >= 0x80)
                     {
                         continue;

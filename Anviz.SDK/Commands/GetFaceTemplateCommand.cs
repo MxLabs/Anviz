@@ -7,11 +7,13 @@ namespace Anviz.SDK.Commands
     class GetFaceTemplateCommand : Command
     {
         private const byte GET_FACETEMPLATE = 0x44;
+        // backup codes 1-10 are the fingers, 11 the face
+        internal const byte FACE_BACKUP_CODE = 11;
         public GetFaceTemplateCommand(ulong deviceId, ulong employeeID) : base(deviceId)
         {
             var payload = new byte[6];
             Bytes.Write(5, employeeID).CopyTo(payload, 0);
-            payload[5] = 1;
+            payload[5] = FACE_BACKUP_CODE;
             BuildPayload(GET_FACETEMPLATE, payload);
         }
     }
