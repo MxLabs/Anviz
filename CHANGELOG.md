@@ -9,6 +9,21 @@ IMPROVEMENTS:
 BUG FIXES:
 * Strings end at their first zero: devices leave bytes of an older value after it (a serial number read as `QWSERF2354234\0m`)
 
+## v2.0.18
+FEATURES:
+* `DeleteEmployeesData()` deletes all the employees, `DeleteEmployeesData(employeeID, method)` deletes one verification method of an employee
+* M7 and A350C devices
+
+IMPROVEMENTS:
+* `BasicSettings.Language` is now an enum (it was a `byte`)
+
+## v2.0.17
+FEATURES:
+* `ScheduledBell.HasValue`
+
+IMPROVEMENTS:
+* NuGet package built and published by GitHub Actions
+
 ## v2.0.16
 FEATURES:
 * InquireCard command to read current card, like EnrollFingerprint
