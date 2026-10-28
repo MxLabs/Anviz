@@ -1,3 +1,14 @@
+## Unreleased
+BREAKING CHANGES:
+
+* `Bytes.Write` throws `ArgumentOutOfRangeException` when a value does not fit in its bytes, instead of silently truncating it. It is used for employee IDs (5 bytes), cards (4 bytes), the amount of `ClearRecords` (3 bytes), `SetDeviceID`, `AdvancedSettings`, `TcpParameters` and `Record`
+
+IMPROVEMENTS:
+* String helpers to write ASCII, UTF-16 and ANSI (Latin-1) fields, and BCD and IPv4 helpers
+
+BUG FIXES:
+* Strings end at their first zero: devices leave bytes of an older value after it (a serial number read as `QWSERF2354234\0m`)
+
 ## v2.0.16
 FEATURES:
 * InquireCard command to read current card, like EnrollFingerprint
