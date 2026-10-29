@@ -26,7 +26,7 @@ IMPROVEMENTS:
 * Tests with a fake device, run on every pull request
 * The solution is `Anviz.slnx`
 * String helpers to write ASCII, UTF-16 and ANSI (Latin-1) fields, and BCD and IPv4 helpers
-* Documented from a W1 and a W2PRO: `EnrollFingerprint` returns the template without keeping it, to save with `SetFingerprintTemplate` as CrossChex does; where the numbers of `SetScheduledBell` start; the bits of `SpecialState`; the broadcast address of `AnvizDiscovery.Search` on a computer with several networks
+* Documented from a W1 and a W2PRO: `EnrollFingerprint` returns the template without keeping it, to save with `SetFingerprintTemplate` as CrossChex does; where the numbers of `SetScheduledBell` start; the bits of `SpecialState`; what `ResetToFactorySettings` deletes; the broadcast address of `AnvizDiscovery.Search` on a computer with several networks
 
 BUG FIXES:
 * A connection whose device is gone, its cable unplugged or switched off, was never closed: `Connected` stayed true and `Disconnected` was not raised, and a device in client mode that connected again was a second device. TCP keepalive closes it about 25 seconds after the last traffic (probes after 10 seconds, every 5, 3 of them); a device in client mode that pinged and then says nothing for 30 seconds is closed too
