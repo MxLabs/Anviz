@@ -161,9 +161,16 @@ namespace Anviz.SDK.Tests
                 await bot.ConnectAsync(IPAddress.Loopback, running.Port);
                 await bot.GetStream().WriteAsync(Encoding.ASCII.GetBytes("GET / HTTP/1.1\r\nHost: x\r\n\r\n"));
                 await WaitUntil(() => !running.Errors.IsEmpty);
-                // the server sent its handshake command, then closed it
+                // the server sent its handshake command, then closed it: with a reset on Windows,
+                // since the rest of the request was not read
                 var buffer = new byte[1024];
-                while (await bot.GetStream().ReadAsync(buffer).AsTask().WaitAsync(WAIT) > 0)
+                try
+                {
+                    while (await bot.GetStream().ReadAsync(buffer).AsTask().WaitAsync(WAIT) > 0)
+                    {
+                    }
+                }
+                catch (IOException e) when (e.InnerException is SocketException { SocketErrorCode: SocketError.ConnectionReset })
                 {
                 }
             }
