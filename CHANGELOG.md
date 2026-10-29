@@ -20,11 +20,13 @@ FEATURES:
 * Messages (0x56 to 0x59), personnel changes (0x64, 0x1E), user exists (0x0C), departments (0x61, 0x62)
 * Administrator cards and password of T5 devices (0x1C, 0x1D)
 * `TcpMode.ClientWithServerUrl`
+* `Record.Status`, the attendance status, and `Record.OpensDoor`
 
 IMPROVEMENTS:
 * Tests with a fake device, run on every pull request
 * The solution is `Anviz.slnx`
 * String helpers to write ASCII, UTF-16 and ANSI (Latin-1) fields, and BCD and IPv4 helpers
+* Documented from a W1 and a W2PRO: `EnrollFingerprint` returns the template without keeping it, to save with `SetFingerprintTemplate` as CrossChex does; where the numbers of `SetScheduledBell` start; the bits of `SpecialState`; the broadcast address of `AnvizDiscovery.Search` on a computer with several networks
 
 BUG FIXES:
 * A connection whose device is gone, its cable unplugged or switched off, was never closed: `Connected` stayed true and `Disconnected` was not raised, and a device in client mode that connected again was a second device. TCP keepalive closes it about 25 seconds after the last traffic (probes after 10 seconds, every 5, 3 of them); a device in client mode that pinged and then says nothing for 30 seconds is closed too

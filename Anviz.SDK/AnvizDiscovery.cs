@@ -24,7 +24,9 @@ namespace Anviz.SDK
         /// <summary>
         /// Broadcasts a search to the given address (255.255.255.255 by default) and answers the
         /// devices that replied within the wait, once each. A device that answers it failed is
-        /// left out.
+        /// left out. On a computer with several networks (a VPN among them) 255.255.255.255 goes
+        /// out of one of them only, chosen by the system: give the broadcast address of the
+        /// devices' network, such as 10.255.255.255 or 192.168.1.255.
         /// </summary>
         public static Task<List<DiscoveredDevice>> Search(TimeSpan wait, IPAddress broadcast = null)
         {
