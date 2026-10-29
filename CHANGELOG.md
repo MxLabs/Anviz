@@ -9,7 +9,7 @@ BREAKING CHANGES:
 * `SetFaceTemplate` sends the template with its length instead of padding it with zeros to 15360 bytes. Newer firmware has 2056-byte templates and answered `RET: FAIL` (#53)
 
 FEATURES:
-* `AnvizDevice.SyncEmployees` makes a device hold exactly a list of employees (`EmployeeData`: `UserInfo` and fingerprint templates): it deletes the ones not wanted, writes only the missing or changed ones and writes every template; `AnvizSync.SyncEmployees` does it on many devices in parallel. Progress, cancellation and a `SyncResult` per device
+* `AnvizDevice.SyncEmployees` makes a device hold exactly a list of employees (`EmployeeData`: `UserInfo` and fingerprint templates): with `SyncMode.Compare` (the default) it deletes the ones not wanted and writes only the missing or changed ones, with `SyncMode.Wipe` it deletes all of them and writes the list; both write every template. `AnvizSync.SyncEmployees` does it on many devices in parallel. Progress, cancellation and a `SyncResult` per device
 * `AnvizDevice.Disconnected`, raised once when the connection ends (closed by the device, lost, after a timeout or by `Dispose`), and `AnvizDevice.Connected`
 * UDP search and network setting of devices (`AnvizDiscovery`, 0x02, 0x03)
 * `UserInfo.IsAdmin` and `ClearAdminFlags` (0x3D)

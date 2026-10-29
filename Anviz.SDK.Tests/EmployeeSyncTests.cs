@@ -5,6 +5,7 @@ namespace Anviz.SDK.Tests
 {
     public class EmployeeSyncTests
     {
+        private const byte GET_STAFF_DATA = 0x72;
         private const byte SET_STAFF_DATA = 0x73;
         private const byte DELETE_STAFF_DATA = 0x4C;
         private const byte DELETE_STAFF_DATA_ALL = 0x4D;
@@ -254,9 +255,65 @@ namespace Anviz.SDK.Tests
             using var device = await fake.Connect();
             var steps = new List<SyncStep>();
 
-            await device.SyncEmployees(Staff(), new SyncProgressRecorder(steps));
+            await device.SyncEmployees(Staff(), progress: new SyncProgressRecorder(steps));
 
             Assert.Equal(new[] { SyncStep.ReadingEmployees, SyncStep.WritingEmployees, SyncStep.WritingFingerprints, SyncStep.Done }, steps.Distinct());
+        }
+
+        [Fact]
+        public async Task WipeDeletesAllAndWritesEverythingWithoutReading()
+        {
+            await using var fake = new FakeDevice();
+            var store = new FakeEmployeeStore(fake);
+            using var device = await fake.Connect();
+            await device.SyncEmployees(Staff());
+            store.Add(new UserInfo(9, "Extra"), Finger.RightThumb);
+            store.Commands.Clear();
+            var steps = new List<SyncStep>();
+
+            var result = await device.SyncEmployees(Staff(), SyncMode.Wipe, new SyncProgressRecorder(steps));
+
+            Assert.Equal(3, result.Added);
+            Assert.Equal(0, result.Updated + result.Recreated + result.Deleted + result.Unchanged);
+            Assert.Equal(3, result.FingerprintsWritten);
+            Assert.Equal(1, store.Commands[DELETE_STAFF_DATA_ALL]);
+            Assert.False(store.Commands.ContainsKey(GET_STAFF_DATA));
+            Assert.False(store.Commands.ContainsKey(DELETE_STAFF_DATA));
+            Assert.Equal(1, store.Commands[SET_STAFF_DATA]);
+            Assert.Equal(new ulong[] { 1, 2, 3 }, store.Ids);
+            Assert.Equal(new[] { Finger.RightIndex, Finger.LeftIndex }, store.User(2).EnrolledFingerprints);
+            Assert.Equal(new[] { SyncStep.DeletingEmployees, SyncStep.WritingEmployees, SyncStep.WritingFingerprints, SyncStep.Done }, steps.Distinct());
+        }
+
+        [Fact]
+        public async Task WipeOnManyDevices()
+        {
+            var fakes = new List<FakeDevice>();
+            var devices = new List<AnvizDevice>();
+            try
+            {
+                for (var i = 0; i < 3; i++)
+                {
+                    var fake = new FakeDevice();
+                    var store = new FakeEmployeeStore(fake);
+                    store.Add(new UserInfo(9, "Extra"));
+                    fakes.Add(fake);
+                    devices.Add(await fake.Connect());
+                }
+
+                var results = await AnvizSync.SyncEmployees(devices, Staff(), SyncMode.Wipe);
+
+                Assert.All(results.Values, r => Assert.Equal(3, r.Added));
+                Assert.All(results.Values, r => Assert.Null(r.Error));
+            }
+            finally
+            {
+                devices.ForEach(d => d.Dispose());
+                foreach (var fake in fakes)
+                {
+                    await fake.DisposeAsync();
+                }
+            }
         }
 
         [Fact]

@@ -22,6 +22,25 @@ namespace Anviz.SDK
         }
     }
 
+    /// <summary>
+    /// How SyncEmployees brings a device to the list
+    /// </summary>
+    public enum SyncMode
+    {
+        /// <summary>
+        /// Reads the employees of the device and sends only the changes: the device works all the
+        /// time, and an interrupted synchronization leaves the old employees in place
+        /// </summary>
+        Compare,
+        /// <summary>
+        /// Deletes every employee with one command and writes the list again, whatever the
+        /// device holds, so fields the comparison does not know are written too. Writing 8
+        /// employees takes about twice as long as reading them (W1, W2PRO), and until its template
+        /// is written again an employee cannot verify by fingerprint
+        /// </summary>
+        Wipe
+    }
+
     public enum SyncStep
     {
         ReadingEmployees,
@@ -48,7 +67,7 @@ namespace Anviz.SDK
     public class SyncResult
     {
         /// <summary>
-        /// Employees the device did not have
+        /// Employees the device did not have; with <see cref="SyncMode.Wipe"/> all the employees written
         /// </summary>
         public int Added { get; internal set; }
         /// <summary>
@@ -84,13 +103,15 @@ namespace Anviz.SDK
     public partial class AnvizDevice
     {
         /// <summary>
-        /// Makes the device hold exactly these employees and fingerprints: deletes the employees it
-        /// should not have, writes the ones that are missing or changed, and writes every
-        /// fingerprint template (reading one to compare takes as long as writing it).
-        /// Employees whose data is already right are not sent again.
+        /// Makes the device hold exactly these employees and fingerprints, and writes every
+        /// fingerprint template (reading one to compare takes as long as writing it). With
+        /// <see cref="SyncMode.Compare"/> it deletes the employees the device should not have and
+        /// writes the ones that are missing or changed; with <see cref="SyncMode.Wipe"/> it deletes
+        /// all of them and writes the list, and the result counts them all as added
         /// </summary>
         public async Task<SyncResult> SyncEmployees(IEnumerable<EmployeeData> employees,
-            IProgress<SyncProgress> progress = null, CancellationToken cancellationToken = default(CancellationToken))
+            SyncMode mode = SyncMode.Compare, IProgress<SyncProgress> progress = null,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             var wanted = new Dictionary<ulong, EmployeeData>();
             foreach (var employee in employees)
@@ -102,7 +123,48 @@ namespace Anviz.SDK
                 wanted.Add(employee.User.Id, employee);
             }
             var result = new SyncResult();
+            List<UserInfo> toWrite;
+            if (mode == SyncMode.Wipe)
+            {
+                progress?.Report(new SyncProgress(SyncStep.DeletingEmployees, 0, 1));
+                cancellationToken.ThrowIfCancellationRequested();
+                await DeleteEmployeesData();
+                progress?.Report(new SyncProgress(SyncStep.DeletingEmployees, 1, 1));
+                toWrite = wanted.Values.Select(e => e.User).ToList();
+                result.Added = toWrite.Count;
+            }
+            else
+            {
+                toWrite = await DeleteChanged(wanted, result, progress, cancellationToken);
+            }
 
+            for (var i = 0; i < toWrite.Count; i += UserInfo.MAX_RECORDS)
+            {
+                progress?.Report(new SyncProgress(SyncStep.WritingEmployees, i, toWrite.Count));
+                cancellationToken.ThrowIfCancellationRequested();
+                await SetEmployeesData(toWrite.Skip(i).Take(UserInfo.MAX_RECORDS).ToList());
+            }
+
+            var templates = wanted.Values
+                .SelectMany(e => e.Fingerprints.Select(f => new { e.User.Id, Finger = f.Key, Template = f.Value }))
+                .ToList();
+            foreach (var template in templates)
+            {
+                progress?.Report(new SyncProgress(SyncStep.WritingFingerprints, result.FingerprintsWritten, templates.Count));
+                cancellationToken.ThrowIfCancellationRequested();
+                await SetFingerprintTemplate(template.Id, template.Finger, template.Template);
+                result.FingerprintsWritten++;
+            }
+
+            progress?.Report(new SyncProgress(SyncStep.Done, 1, 1));
+            return result;
+        }
+
+        // DeleteChanged reads the employees of the device, deletes the ones not wanted or to
+        // recreate and answers the ones to write
+        private async Task<List<UserInfo>> DeleteChanged(Dictionary<ulong, EmployeeData> wanted,
+            SyncResult result, IProgress<SyncProgress> progress, CancellationToken cancellationToken)
+        {
             progress?.Report(new SyncProgress(SyncStep.ReadingEmployees, 0, 1));
             var current = await GetEmployeesData();
             cancellationToken.ThrowIfCancellationRequested();
@@ -155,27 +217,7 @@ namespace Anviz.SDK
                     await DeleteEmployeesData(toDelete[i]);
                 }
             }
-
-            for (var i = 0; i < toWrite.Count; i += UserInfo.MAX_RECORDS)
-            {
-                progress?.Report(new SyncProgress(SyncStep.WritingEmployees, i, toWrite.Count));
-                cancellationToken.ThrowIfCancellationRequested();
-                await SetEmployeesData(toWrite.Skip(i).Take(UserInfo.MAX_RECORDS).ToList());
-            }
-
-            var templates = wanted.Values
-                .SelectMany(e => e.Fingerprints.Select(f => new { e.User.Id, Finger = f.Key, Template = f.Value }))
-                .ToList();
-            foreach (var template in templates)
-            {
-                progress?.Report(new SyncProgress(SyncStep.WritingFingerprints, result.FingerprintsWritten, templates.Count));
-                cancellationToken.ThrowIfCancellationRequested();
-                await SetFingerprintTemplate(template.Id, template.Finger, template.Template);
-                result.FingerprintsWritten++;
-            }
-
-            progress?.Report(new SyncProgress(SyncStep.Done, 1, 1));
-            return result;
+            return toWrite;
         }
 
         /// <summary>
@@ -204,7 +246,8 @@ namespace Anviz.SDK
         /// that fails does not stop the others: its result has the <see cref="SyncResult.Error"/>
         /// </summary>
         public static async Task<Dictionary<AnvizDevice, SyncResult>> SyncEmployees(IEnumerable<AnvizDevice> devices,
-            IEnumerable<EmployeeData> employees, int maxParallel = 0, CancellationToken cancellationToken = default(CancellationToken))
+            IEnumerable<EmployeeData> employees, SyncMode mode = SyncMode.Compare, int maxParallel = 0,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
             var list = employees.ToList();
             var targets = devices.Distinct().ToList();
@@ -217,7 +260,7 @@ namespace Anviz.SDK
                     SyncResult result;
                     try
                     {
-                        result = await device.SyncEmployees(list, null, cancellationToken);
+                        result = await device.SyncEmployees(list, mode, null, cancellationToken);
                     }
                     catch (Exception ex)
                     {
