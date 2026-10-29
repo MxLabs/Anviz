@@ -17,8 +17,11 @@ namespace Anviz.SDK.Tests
         private const byte DELETE_STAFF_DATA_ALL = 0x4D;
         private const byte SET_FPTEMPLATE = 0x45;
         private const int FINGERS_OFFSET = 35;
+        private const int PWDH8_OFFSET = 37;
+        private const int KEEP_OFFSET = 38;
 
         private readonly object sync = new object();
+        private readonly Random garbage = new Random(1);
         private readonly SortedDictionary<ulong, byte[]> users = new SortedDictionary<ulong, byte[]>();
         private readonly Dictionary<(ulong, Finger), byte[]> templates = new Dictionary<(ulong, Finger), byte[]>();
         private int cursor;
@@ -113,6 +116,10 @@ namespace Anviz.SDK.Tests
                             // the fingerprint state cannot be set: it stays what it was
                             var fingers = users.TryGetValue(id, out var old) ? old.Skip(FINGERS_OFFSET).Take(2).ToArray() : new byte[2];
                             fingers.CopyTo(user, FINGERS_OFFSET);
+                            // a W1 and a W2PRO keep neither the high bits of the password nor the
+                            // reserved byte as sent: they read back as anything
+                            user[PWDH8_OFFSET] = (byte)garbage.Next(256);
+                            user[KEEP_OFFSET] = (byte)garbage.Next(256);
                             users[id] = user;
                         }
                         return Reply.Ok(new byte[] { 0x0F, 0xFF });

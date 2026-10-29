@@ -122,7 +122,7 @@ namespace Anviz.SDK
                     toWrite.Add(want.User);
                     result.Recreated++;
                 }
-                else if (!user.ToArray().SequenceEqual(want.User.ToArray()))
+                else if (!SameData(user, want.User))
                 {
                     toWrite.Add(want.User);
                     result.Updated++;
@@ -176,6 +176,23 @@ namespace Anviz.SDK
 
             progress?.Report(new SyncProgress(SyncStep.Done, 1, 1));
             return result;
+        }
+
+        /// <summary>
+        /// Whether the device holds the data of the employee. Not byte by byte: a W1 and a W2PRO
+        /// read back the high bits of the password (PWDH8) and the reserved byte (Keep) as
+        /// anything, whatever was written, and the fingerprint state is not written
+        /// </summary>
+        private static bool SameData(UserInfo device, UserInfo wanted)
+        {
+            return device.Id == wanted.Id
+                && device.Password == wanted.Password
+                && device.Card == wanted.Card
+                && device.Name == wanted.Name
+                && device.Department == wanted.Department
+                && device.Group == wanted.Group
+                && device.Mode == wanted.Mode
+                && device.Message == wanted.Message;
         }
     }
 
