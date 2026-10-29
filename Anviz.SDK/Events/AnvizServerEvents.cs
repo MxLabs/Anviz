@@ -158,4 +158,21 @@ namespace Anviz.SDK.Events
             Exception = exception;
         }
     }
+
+    /// <summary>
+    /// A command or the store failed while <see cref="AnvizRecordCollector"/> collected from a device
+    /// </summary>
+    public class RecordCollectorErrorEventArgs : EventArgs
+    {
+        public string Serial { get; }
+        public AnvizDevice Device { get; }
+        public Exception Exception { get; }
+
+        internal RecordCollectorErrorEventArgs(string serial, AnvizDevice device, Exception exception)
+        {
+            Serial = serial;
+            Device = device;
+            Exception = exception;
+        }
+    }
 }
