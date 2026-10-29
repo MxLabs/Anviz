@@ -10,6 +10,7 @@ BREAKING CHANGES:
 
 FEATURES:
 * `AnvizDevice.SyncEmployees` makes a device hold exactly a list of employees (`EmployeeData`: `UserInfo` and fingerprint templates): with `SyncMode.Compare` (the default) it deletes the ones not wanted and writes only the missing or changed ones, with `SyncMode.Wipe` it deletes all of them and writes the list; both write every template. `AnvizSync.SyncEmployees` does it on many devices in parallel. Progress, cancellation and a `SyncResult` per device
+* `AnvizServer` keeps many devices connected, by serial number (#21): it listens for devices in client mode, connects to devices in server mode by address (`AddDevice`) and reconnects them, or both. Events `DeviceConnected`, `DeviceDisconnected` (with the reason), `RecordReceived` and `Error`; a new connection of the same serial replaces the old one; optional `HeartbeatTimeout` and `AcceptDevice` filter; `Disconnect(serial)` and `Devices`. Connections that are not devices (scanners, HTTP requests, wrong addresses) are closed after a failed handshake
 * `AnvizDevice.Disconnected`, raised once when the connection ends (closed by the device, lost, after a timeout or by `Dispose`), and `AnvizDevice.Connected`
 * UDP search and network setting of devices (`AnvizDiscovery`, 0x02, 0x03)
 * `UserInfo.IsAdmin` and `ClearAdminFlags` (0x3D)

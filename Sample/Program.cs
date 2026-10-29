@@ -120,5 +120,25 @@ namespace Sample
                 await device.SetFaceTemplate(employee.Id, fp);
             }
         }
+
+        /// <summary>
+        /// Many devices at once: the ones in client mode connect on port 5010, the ones in server
+        /// mode are connected by address and connected again when lost
+        /// </summary>
+        public static async Task ServerExample(CancellationToken stop)
+        {
+            using var server = new AnvizServer
+            {
+                AuthenticateConnection = true,
+                HeartbeatTimeout = TimeSpan.FromMinutes(2),
+            };
+            server.Listen(5010);
+            server.AddDevice(DEVICE_HOST);
+            server.DeviceConnected += (s, e) => Console.WriteLine($"{e.Serial} connected from {e.EndPoint} ({e.Origin})");
+            server.DeviceDisconnected += (s, e) => Console.WriteLine($"{e.Serial} disconnected: {e.Reason}");
+            server.RecordReceived += (s, e) => Console.WriteLine($"{e.Serial}: user {e.Record.UserCode} at {e.Record.DateTime}");
+            server.Error += (s, e) => Console.WriteLine($"{e.EndPoint}: {e.Exception.Message}");
+            await server.RunAsync(stop);
+        }
     }
 }
