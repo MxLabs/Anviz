@@ -1,5 +1,6 @@
 ﻿using Anviz.SDK.Commands;
 using Anviz.SDK.Responses;
+using Anviz.SDK.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -33,13 +34,26 @@ namespace Anviz.SDK
             await SetEmployeesData(new List<UserInfo> { user });
         }
 
+        /// <summary>
+        /// Writes the employees, 8 per command. The answer has a bit per employee sent, set when the
+        /// device stored it: an employee it did not store throws <see cref="AnvizDeviceException"/>
+        /// with <see cref="ResponseStatus.Fail"/> (an M7 clears it, found by level54; a W1 and a W2PRO
+        /// answer all set and refuse with an error instead)
+        /// </summary>
         public async Task SetEmployeesData(List<UserInfo> users)
         {
             // the command takes the users it sends out of the list: work on a copy of the caller's
             users = new List<UserInfo>(users);
             while (users.Count > 0)
             {
-                await DeviceStream.SendCommand(new SetStaffDataCommand(DeviceId, users));
+                var sent = Math.Min(users.Count, UserInfo.MAX_RECORDS);
+                var response = await DeviceStream.SendCommand(new SetStaffDataCommand(DeviceId, users));
+                var stored = (1UL << sent) - 1;
+                // a device that answers no flag says nothing more than its RET
+                if (response.DATA.Length > 0 && (Bytes.Read(response.DATA) & stored) != stored)
+                {
+                    throw new AnvizDeviceException(ResponseStatus.Fail);
+                }
             }
         }
     }
