@@ -27,6 +27,7 @@ IMPROVEMENTS:
 * String helpers to write ASCII, UTF-16 and ANSI (Latin-1) fields, and BCD and IPv4 helpers
 
 BUG FIXES:
+* A connection whose device is gone, its cable unplugged or switched off, was never closed: `Connected` stayed true and `Disconnected` was not raised, and a device in client mode that connected again was a second device. TCP keepalive closes it about 25 seconds after the last traffic (probes after 10 seconds, every 5, 3 of them); a device in client mode that pinged and then says nothing for 30 seconds is closed too
 * An answer arriving before the library started waiting for it was lost, ending in "Device timeout waiting response." and a closed connection (likely #86)
 * Commands sent at the same time from several threads could take each other's answer: they are now sent one at a time
 * The pong to the device ping could be written in the middle of a command
