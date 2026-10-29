@@ -18,12 +18,16 @@ namespace Anviz.SDK
 {
     public partial class AnvizDevice
     {
+        /// <summary>
+        /// The id the device answers 0x46 with. <see cref="DeviceId"/> stays the one its answers
+        /// carry: an M7 answers here the id set in its menu, and does not answer commands sent to it
+        /// (found by level54 on an M7)
+        /// </summary>
         [System.Obsolete]
         public async Task<ulong> GetDeviceID()
         {
             var response = await DeviceStream.SendCommand(new GetDeviceIDCommand(DeviceId));
-            DeviceId = Bytes.Read(response.DATA);
-            return DeviceId;
+            return Bytes.Read(response.DATA);
         }
     }
 }

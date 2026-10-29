@@ -1,3 +1,12 @@
+## Unreleased
+FEATURES:
+* `EnrollFingerprint(employeeID, finger)` enrolls the finger asked, and reads its template (tested on a W2PRO); `EnrollFingerprint(employeeID)` is still the first finger
+* `EnrollFace` enrolls the face on a face device and reads its template: the enrollment with the face backup code 11, which opens the face enrollment of a FaceDeep 5 (found by iot95). Not tested on a face device; a W2PRO asks for a finger
+
+BUG FIXES:
+* `SetEmployeesData` throws `AnvizDeviceException` (`Fail`) when the device did not store an employee: an M7 answers a flag per employee, clear for one not stored, which was ignored (found by level54 on an M7; a W1 and a W2PRO answer all set)
+* `GetDeviceID` no longer changes `DeviceId`: an M7 answers it with the id of its menu, and commands sent to that id get no answer (found by level54 on an M7)
+
 ## v3.0.0
 BREAKING CHANGES:
 
