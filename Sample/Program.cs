@@ -140,5 +140,27 @@ namespace Sample
             server.Error += (s, e) => Console.WriteLine($"{e.EndPoint}: {e.Exception.Message}");
             await server.RunAsync(stop);
         }
+
+        /// <summary>
+        /// Every record of every device, also those made while it was not connected, stored once
+        /// and then deleted from the device
+        /// </summary>
+        public static async Task RecordsExample(CancellationToken stop)
+        {
+            using var server = new AnvizServer();
+            server.Listen(5010);
+            using var records = new AnvizRecordCollector(server, async (batch, token) =>
+            {
+                foreach (var record in batch.Records)
+                {
+                    // store it so that the same record twice is kept once (serial, user, time)
+                    Console.WriteLine($"{batch.Serial} ({batch.Source}): user {record.UserCode} at {record.DateTime}");
+                }
+                await Task.CompletedTask;
+                return true; // false keeps them on the device, to try again
+            });
+            records.Error += (s, e) => Console.WriteLine($"{e.Serial}: {e.Exception.Message}");
+            await server.RunAsync(stop);
+        }
     }
 }
