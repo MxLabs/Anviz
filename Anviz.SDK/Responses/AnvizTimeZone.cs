@@ -64,7 +64,7 @@ namespace Anviz.SDK.Responses
             {
                 new byte[] { number }
             };
-            for (var day = 0; day < 6; day++)
+            for (var day = 0; day < 7; day++)
             {
                 ret.Add(Days[(DayName)day].ToArray());
             }

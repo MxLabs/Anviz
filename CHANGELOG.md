@@ -32,6 +32,9 @@ BUG FIXES:
 * The pong to the device ping could be written in the middle of a command
 * Packets split by TCP in more reads, or bigger than 16000 bytes, closed the connection
 * Strings end at their first zero: devices leave bytes of an older value after it (a serial number read as `QWSERF2354234\0m`)
+* `SetTimeZoneInfo` did not send Sunday: the device read it from whatever followed (a Sunday of `1.19:27`)
+* `AnvizDevice.Connected` is false as soon as a command times out; it stayed true until the receiver noticed the closed connection, so the next command failed with "Device is not connected."
+* The W2PRO is a fingerprint device (`BiometricType.Finger`)
 
 ## v2.0.18
 FEATURES:

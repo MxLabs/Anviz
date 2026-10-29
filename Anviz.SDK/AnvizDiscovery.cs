@@ -42,9 +42,10 @@ namespace Anviz.SDK
         }
 
         /// <summary>
-        /// Gives a device its network over UDP; it answers whether it took it. A device ignores a
-        /// setting with another MAC address or a wrong user or password, which then fails as a
-        /// timeout.
+        /// Gives a device its network over UDP; it answers whether it took it. A wrong user or
+        /// password is answered with a failure (W1, W2PRO: the defaults are admin and 12345, an
+        /// empty user fails); a device ignores a setting with another MAC address, which then
+        /// fails as a timeout.
         /// </summary>
         public static async Task SetNetwork(UdpNetworkSetting setting, TimeSpan wait, IPAddress broadcast = null)
         {

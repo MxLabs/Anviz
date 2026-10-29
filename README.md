@@ -67,6 +67,7 @@ Tested devices
  - A350C
  - M7
  - A380
+ - W2 Pro
 
 Contributing
 --------
