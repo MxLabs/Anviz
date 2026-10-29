@@ -25,6 +25,11 @@ namespace Anviz.SDK
 
         public bool Connected => DeviceStream.Connected;
 
+        internal TimeSpan PingSilence
+        {
+            set => DeviceStream.PingSilence = value;
+        }
+
         public AnvizDevice(TcpClient socket)
         {
             DeviceStream = new AnvizStream(socket);

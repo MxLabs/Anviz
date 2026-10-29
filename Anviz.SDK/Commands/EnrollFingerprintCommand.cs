@@ -24,7 +24,11 @@ namespace Anviz.SDK
     public partial class AnvizDevice
     {
         /// <summary>
-        /// Enrolls a fingerprint on the device and returns its template
+        /// Reads a fingerprint on the device and returns its template, which the device does not
+        /// keep: save it on the user with SetFingerprintTemplate, as CrossChex does after an
+        /// enrollment (W1, W2PRO). A finger already enrolled fails with
+        /// <see cref="Responses.ResponseStatus.FingerOccupied"/>. A W1 shows the second request
+        /// for a few seconds only, and then does not answer: the command times out
         /// </summary>
         /// <param name="verifyCount">How many times the user puts the finger: 1 or 2, the protocol has no more</param>
         public async Task<byte[]> EnrollFingerprint(ulong employeeID, int verifyCount = 2)

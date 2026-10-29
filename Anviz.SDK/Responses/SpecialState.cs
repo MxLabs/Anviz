@@ -1,7 +1,9 @@
 ﻿namespace Anviz.SDK.Responses
 {
     /// <summary>
-    /// The state of the door a device controls (0x2F)
+    /// The state of the door a device controls (0x2F), with the bits of the CrossChex SDK. On a
+    /// W2PRO LockOpen is always set and DoorOpen is set while UnlockDoor keeps the lock released;
+    /// a W1 with the relay on the bell answers 0
     /// </summary>
     public class SpecialState
     {

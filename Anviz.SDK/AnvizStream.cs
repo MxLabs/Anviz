@@ -27,6 +27,15 @@ namespace Anviz.SDK
         private readonly SemaphoreSlim WriteLock = new SemaphoreSlim(1, 1);
         private PendingCommand Pending;
         private bool Closed;
+        /// <summary>
+        /// A device in client mode pings every 10 seconds: a connection that was pinged and then
+        /// says nothing for this long is lost, as when the cable is unplugged. Without a ping the
+        /// TCP keepalive tells it
+        /// </summary>
+        internal TimeSpan PingSilence { get; set; } = TimeSpan.FromSeconds(30);
+        private readonly Timer PingWatchdog;
+        private long LastReceived = DateTime.UtcNow.Ticks;
+        private bool Pinged;
         private int DisconnectedRaised;
         private int Disposed;
 
@@ -57,11 +66,59 @@ namespace Anviz.SDK
             DeviceSocket.SendTimeout = DEVICE_TIMEOUT;
             DeviceStream.WriteTimeout = DEVICE_TIMEOUT;
             DeviceStream.ReadTimeout = DEVICE_TIMEOUT;
+            EnableKeepAlive(socket.Client);
+            // before the receiver, which disposes it when it ends
+            PingWatchdog = new Timer(CheckPings, null, 1000, 1000);
             ReceiverThread = new Thread(ReceiverThreadFunc)
             {
                 IsBackground = true
             };
             ReceiverThread.Start();
+        }
+
+        /// <summary>
+        /// A connection whose device is gone, unplugged or switched off, gets no answer and no
+        /// end: the system probes it after 10 seconds without traffic, every 5 seconds, and
+        /// closes it after 3 probes without an answer
+        /// </summary>
+        private static void EnableKeepAlive(Socket socket)
+        {
+            try
+            {
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                // TcpKeepAliveTime, TcpKeepAliveRetryCount and TcpKeepAliveInterval: Windows 10
+                // takes them as they are, .NET Core translates them for the other systems
+                socket.SetSocketOption(SocketOptionLevel.Tcp, (SocketOptionName)3, 10);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, (SocketOptionName)16, 3);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, (SocketOptionName)17, 5);
+            }
+            catch (SocketException)
+            {
+                // an older Windows takes the times in milliseconds this way; the probes are 10
+                try
+                {
+                    var values = new byte[12];
+                    BitConverter.GetBytes(1).CopyTo(values, 0);
+                    BitConverter.GetBytes(10000).CopyTo(values, 4);
+                    BitConverter.GetBytes(5000).CopyTo(values, 8);
+                    socket.IOControl(IOControlCode.KeepAliveValues, values, null);
+                }
+                catch (Exception)
+                {
+                    // the system's keepalive times, or none
+                }
+            }
+        }
+
+        private void CheckPings(object state)
+        {
+            if (Volatile.Read(ref Pinged) && !Volatile.Read(ref Closed)
+                && DateTime.UtcNow - new DateTime(Interlocked.Read(ref LastReceived)) > PingSilence)
+            {
+                // the receiver ends and raises Disconnected
+                Volatile.Write(ref Closed, true);
+                DeviceSocket.Close();
+            }
         }
 
         private async void ReceiverThreadFunc()
@@ -81,9 +138,11 @@ namespace Anviz.SDK
                 {
                     break;
                 }
+                Interlocked.Exchange(ref LastReceived, DateTime.UtcNow.Ticks);
                 var pending = Volatile.Read(ref Pending);
                 if (response.ResponseCode == 0x7F)
                 {
+                    Volatile.Write(ref Pinged, true);
                     try
                     {
                         await Write(new PongCommand(response.DeviceID));
@@ -104,7 +163,9 @@ namespace Anviz.SDK
                     ReceivedPacket?.Invoke(this, response);
                 }
             }
-            // closed by the device, by a timeout or by Dispose: in every case nothing is read anymore
+            // closed by the device, by a timeout, by the silence after pings or by Dispose: in every
+            // case nothing is read anymore
+            PingWatchdog.Dispose();
             DeviceSocket.Close();
             Volatile.Write(ref Closed, true);
             Interlocked.Exchange(ref Pending, null)?.Result.TrySetResult(null);

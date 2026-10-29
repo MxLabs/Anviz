@@ -21,6 +21,51 @@ namespace Anviz.SDK.Tests
         }
 
         [Fact]
+        public async Task SilenceAfterPingsDisconnects()
+        {
+            // a W1 in client mode whose cable is unplugged: no more pings, and no end of the connection
+            await using var fake = new FakeDevice();
+            using var device = await fake.Connect();
+            device.PingSilence = TimeSpan.FromSeconds(1);
+            var disconnected = new TaskCompletionSource();
+            device.Disconnected += (s, e) => disconnected.TrySetResult();
+
+            await fake.Send(0x7F, Array.Empty<byte>());
+
+            await disconnected.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            Assert.False(device.Connected);
+        }
+
+        [Fact]
+        public async Task PingsKeepTheConnection()
+        {
+            await using var fake = new FakeDevice();
+            using var device = await fake.Connect();
+            device.PingSilence = TimeSpan.FromSeconds(1);
+
+            for (var i = 0; i < 8; i++)
+            {
+                await fake.Send(0x7F, Array.Empty<byte>());
+                await Task.Delay(300);
+            }
+
+            Assert.True(device.Connected);
+        }
+
+        [Fact]
+        public async Task SilenceWithoutPingsKeepsTheConnection()
+        {
+            // a device in server mode does not ping: only commands and the keepalive tell it is gone
+            await using var fake = new FakeDevice();
+            using var device = await fake.Connect();
+            device.PingSilence = TimeSpan.FromSeconds(1);
+
+            await Task.Delay(2500);
+
+            Assert.True(device.Connected);
+        }
+
+        [Fact]
         public async Task DisconnectedIsRaisedOnceOnDispose()
         {
             await using var fake = new FakeDevice();
