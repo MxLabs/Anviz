@@ -18,6 +18,7 @@
                     return BiometricType.Face;
                 case "VF30PRO": //VF30 (PRO)
                 case "W1": //W1 (PRO)
+                case "W2PRO": //W2 PRO
                 case "TC-B-N": //TC550
                 case "M7A+-N": //M7
                     return BiometricType.Finger;

@@ -52,12 +52,21 @@ namespace Anviz.SDK
         private async Task<AnvizDevice> GetDevice(TcpClient DeviceSocket)
         {
             var device = new AnvizDevice(DeviceSocket);
-            if (AuthenticateConnection)
+            try
             {
-                await device.SetConnectionPassword(ConnectionUser, ConnectionPassword);
+                if (AuthenticateConnection)
+                {
+                    await device.SetConnectionPassword(ConnectionUser, ConnectionPassword);
+                }
+                await device.GetDeviceBiometricType();
+                return device;
             }
-            await device.GetDeviceBiometricType();
-            return device;
+            catch
+            {
+                // not a device, or one that refused us: do not leave the connection open
+                device.Dispose();
+                throw;
+            }
         }
     }
 }

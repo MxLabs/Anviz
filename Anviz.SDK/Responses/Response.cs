@@ -6,19 +6,24 @@ using System.Threading.Tasks;
 
 namespace Anviz.SDK.Responses
 {
+    /// <summary>
+    /// The RET value of a response: whether the device could do the command
+    /// </summary>
+    public enum ResponseStatus : byte
+    {
+        Success = 0x00, // operation successful
+        Fail = 0x01, // operation failed
+        Full = 0x04, // user full
+        Empty = 0x05, // user empty
+        NoUser = 0x06, // user not exist
+        TimeOut = 0x08, // capture timeout
+        UserOccupied = 0x0A, // user already exists
+        FingerOccupied = 0x0B, // fingerprint already exists
+    }
+
     public class Response
     {
-        enum RetVal
-        {
-            SUCCESS = 0x00, // operation successful
-            FAIL = 0x01, // operation failed
-            FULL = 0x04, // user full
-            EMPTY = 0x05, // user empty
-            NO_USER = 0x06, // user not exist
-            TIME_OUT = 0x08, // capture timeout
-            USER_OCCUPIED = 0x0A, // user already exists
-            FINGER_OCCUPIED = 0x0B, // fingerprint already exists
-        }
+        private const int HEADER_LENGTH = 6; // STX + CH + ACK
 
         public ulong DeviceID { get; }
 
@@ -26,27 +31,31 @@ namespace Anviz.SDK.Responses
 
         public byte ResponseCode { get; }
 
-        internal Response(byte[] data, ulong deviceId, byte ACK)
+        /// <summary>
+        /// The RET value. Packets the device sends by itself (ACK below 0x80) have none and are Success
+        /// </summary>
+        public ResponseStatus Status { get; }
+
+        internal Response(byte[] data, ulong deviceId, byte ACK, ResponseStatus status)
         {
             DATA = data;
             DeviceID = deviceId;
             ResponseCode = ACK;
+            Status = status;
         }
 
+        /// <summary>
+        /// Reads a whole packet, also when RET is not success, so the stream stays aligned.
+        /// Returns null when the connection is closed
+        /// </summary>
         internal static async Task<Response> FromStream(NetworkStream stream, CancellationToken ct)
         {
-            var base_offset = 6;
-            var data = new byte[16000]; //for facepass7 template size is 15360
+            var header = new byte[HEADER_LENGTH];
             try
             {
-                var amount = await stream.ReadAsync(data, 0, base_offset, ct);
-                if (amount == 0)
+                if (!await ReadAsyncContinuously(stream, header, 0, HEADER_LENGTH, ct, true))
                 {
                     return null;
-                }
-                if (amount != base_offset)
-                {
-                    throw new Exception("Partial packet read");
                 }
             }
             catch (Exception)
@@ -54,38 +63,25 @@ namespace Anviz.SDK.Responses
                 return null;
             }
 
-            var STX = data[0];
+            var STX = header[0];
             if (STX != 0xA5)
             {
                 throw new Exception("Invalid header");
             }
-            var CH = Bytes.Split(data, 1, 4);
-            var ACK = data[5];
-            if (ACK < 0x80)
-            {
-                if (await stream.ReadAsync(data, base_offset, 2, ct) != 2)
-                {
-                    throw new Exception("Partial packet read");
-                }
-                base_offset += 2;
-            }
-            else
-            {
-                if (await stream.ReadAsync(data, base_offset, 3, ct) != 3)
-                {
-                    throw new Exception("Partial packet read");
-                }
-                var RET = (RetVal)data[6];
-                if (RET != RetVal.SUCCESS)
-                {
-                    throw new Exception("RET: " + RET.ToString());
-                }
-                base_offset += 3;
-            }
-            var LEN = (int)Bytes.Read(Bytes.Split(data, 7, 2));
-            var P_LEN = LEN + 2;
+            var CH = Bytes.Split(header, 1, 4);
+            var ACK = header[5];
+            var hasRet = ACK >= 0x80;
+            var base_offset = HEADER_LENGTH + (hasRet ? 3 : 2); // [RET] + LEN
+            var head = new byte[base_offset];
+            header.CopyTo(head, 0);
+            await ReadAsyncContinuously(stream, head, HEADER_LENGTH, base_offset - HEADER_LENGTH, ct);
 
-            await ReadAsyncContinuously(stream, data, base_offset, P_LEN, ct);
+            var status = hasRet ? (ResponseStatus)head[HEADER_LENGTH] : ResponseStatus.Success;
+            var LEN = (int)Bytes.Read(Bytes.Split(head, base_offset - 2, 2));
+
+            var data = new byte[base_offset + LEN + 2];
+            head.CopyTo(data, 0);
+            await ReadAsyncContinuously(stream, data, base_offset, LEN + 2, ct);
 
             var PacketData = Bytes.Split(data, base_offset, LEN);
             var CRC = Bytes.Split(data, LEN + base_offset, 2);
@@ -95,21 +91,30 @@ namespace Anviz.SDK.Responses
             {
                 throw new Exception("Invalid CRC");
             }
-            return new Response(PacketData, Bytes.Read(CH), ACK);
+            return new Response(PacketData, Bytes.Read(CH), ACK, status);
         }
 
-        private static async Task ReadAsyncContinuously(NetworkStream stream, byte[] data, int offset, int size, CancellationToken ct)
+        /// <summary>
+        /// Reads exactly size bytes: TCP can deliver a packet in several pieces.
+        /// When allowClosed, returns false if the connection is closed before the first byte
+        /// </summary>
+        private static async Task<bool> ReadAsyncContinuously(NetworkStream stream, byte[] data, int offset, int size, CancellationToken ct, bool allowClosed = false)
         {
             int readed = 0;
-            do
+            while (readed < size)
             {
                 var amount = await stream.ReadAsync(data, offset + readed, size - readed, ct);
                 if (amount == 0)
                 {
+                    if (allowClosed && readed == 0)
+                    {
+                        return false;
+                    }
                     throw new Exception("Partial packet read");
                 }
                 readed += amount;
-            } while (readed < size);
+            }
+            return true;
         }
     }
 }

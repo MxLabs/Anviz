@@ -29,15 +29,18 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
     - name: Restore dependencies
       run: dotnet restore
+
+    - name: Test
+      run: dotnet test --no-restore
       
     - name: Publishing project
       run: dotnet publish ${{ env.ProjectPath }} --no-restore
 
     - name: Packing Nuget package
-      run: dotnet pack ${{ env.ProjectPath }} -c Release /p:PackageVersion=${{ steps.anviz.outputs.tag }} -o ${{ env.NuGetDirectory }}
+      run: dotnet pack ${{ env.ProjectPath }} -c Release /p:Version=${{ steps.anviz.outputs.tag }} -o ${{ env.NuGetDirectory }}
 
     - name: Publishing NuGet package
       run: dotnet nuget push ${{ env.NuGetDirectory }}/Anviz.SDK.${{ steps.anviz.outputs.tag }}.nupkg --skip-duplicate -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json

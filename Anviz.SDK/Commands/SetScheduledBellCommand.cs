@@ -23,6 +23,11 @@ namespace Anviz.SDK
 {
     public partial class AnvizDevice
     {
+        /// <summary>
+        /// Sets one of the 30 bells GetScheduledBells reads. The protocol does not say where the
+        /// numbers start, and firmwares differ: a W2PRO takes 1 to 30 for the bells 0 to 29 and
+        /// ignores 0, a W1 takes 0 to 29 and ignores 30. Read the bells back to know
+        /// </summary>
         public async Task SetScheduledBell(byte number, ScheduledBell value)
         {
             await DeviceStream.SendCommand(new SetScheduledBellCommand(DeviceId, number, value));
