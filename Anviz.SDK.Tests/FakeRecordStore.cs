@@ -30,9 +30,9 @@ namespace Anviz.SDK.Tests
         public ConcurrentDictionary<byte, int> Commands { get; } = new ConcurrentDictionary<byte, int>();
 
         /// <summary>
-        /// Called on each download, to make a record while the records are read
+        /// Called when the records are about to be deleted, to make one right before
         /// </summary>
-        public Action? OnDownload { get; set; }
+        public Action? OnDelete { get; set; }
 
         public bool RealTimeMode
         {
@@ -108,7 +108,6 @@ namespace Anviz.SDK.Tests
                         return Reply.Ok(stats);
                     }
                 case GET_RECORDS:
-                    OnDownload?.Invoke();
                     lock (sync)
                     {
                         if (data[0] != 0)
@@ -120,6 +119,7 @@ namespace Anviz.SDK.Tests
                         return Reply.Ok(new[] { (byte)page.Count }.Concat(page.SelectMany(r => r)).ToArray());
                     }
                 case DELETE_RECORDS:
+                    OnDelete?.Invoke();
                     lock (sync)
                     {
                         if (data[0] == 0)

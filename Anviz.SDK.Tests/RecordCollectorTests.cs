@@ -147,22 +147,25 @@ namespace Anviz.SDK.Tests
         }
 
         [Fact]
-        public async Task ARecordMadeWhileDownloadingIsNotDeleted()
+        public async Task ARecordMadeWhileStoringIsNotDeleted()
         {
             await using var fake = new FakeDevice();
             var device = new FakeRecordStore(fake);
             device.Keep(1, At);
+            using var anviz = await fake.Connect();
             var made = 0;
-            // made without real time, between the download and the deletion
-            device.OnDownload = () =>
+            // made without real time while the store takes the first records, which can take seconds
+            var store = new Store
             {
-                if (Interlocked.Exchange(ref made, 1) == 0)
+                Answer = b =>
                 {
-                    Task.Run(() => device.Keep(2, At.AddMinutes(1)));
+                    if (Interlocked.Exchange(ref made, 1) == 0)
+                    {
+                        device.Keep(2, At.AddMinutes(1));
+                    }
+                    return true;
                 }
             };
-            using var anviz = await fake.Connect();
-            var store = new Store();
             using var collector = Collector(store);
             collector.EnableRealTime = false;
 
@@ -170,6 +173,32 @@ namespace Anviz.SDK.Tests
 
             await WaitUntil(() => device.Count == 0 && store.Records.Count == 2);
             Assert.Equal(new[] { (1UL, At), (2UL, At.AddMinutes(1)) }, store.Records.OrderBy(r => r.Item1));
+        }
+
+        [Fact]
+        public async Task ARecordMadeJustBeforeTheDeletionComesInRealTime()
+        {
+            await using var fake = new FakeDevice();
+            var device = new FakeRecordStore(fake) { RealTimeMode = true };
+            device.Keep(1, At);
+            var made = 0;
+            // made after the records were counted again, right before they are all deleted
+            device.OnDelete = () =>
+            {
+                if (Interlocked.Exchange(ref made, 1) == 0)
+                {
+                    device.Verify(2, At.AddMinutes(1)).Wait();
+                }
+            };
+            using var anviz = await fake.Connect();
+            var store = new Store();
+            using var collector = Collector(store);
+
+            collector.Add("FAKE0001", anviz);
+
+            await WaitUntil(() => store.Records.Count == 2);
+            Assert.Equal(new[] { RecordSource.Download, RecordSource.RealTime }, store.Taken.Select(b => b.Source));
+            Assert.Equal(new[] { (1UL, At), (2UL, At.AddMinutes(1)) }, store.Records);
         }
 
         [Fact]

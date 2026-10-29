@@ -19,7 +19,9 @@ namespace Anviz.SDK
     /// <remarks>
     /// The device is a buffer: the records are deleted with <see cref="AnvizDevice.DeleteAllRecords"/>,
     /// not marked as read, because a W2PRO marks the new records read as they are downloaded, even
-    /// when the store then fails.
+    /// when the store then fails. Before deleting, the records are counted again, so one made while
+    /// the others were stored is stored too; one made in the moment between that count and the
+    /// deletion (one command) is deleted with them, and comes only in real time: keep real time on.
     /// </remarks>
     public sealed class AnvizRecordCollector : IDisposable
     {
