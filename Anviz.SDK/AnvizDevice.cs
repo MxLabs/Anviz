@@ -1,6 +1,7 @@
 ﻿using Anviz.SDK.Responses;
 using Anviz.SDK.Utils;
 using System;
+using System.Linq;
 using System.Net.Sockets;
 
 namespace Anviz.SDK
@@ -35,7 +36,10 @@ namespace Anviz.SDK
                         DevicePing?.Invoke(this, null);
                         break;
                     case 0xDF:
-                        ReceivedRecord?.Invoke(this, new Record(e.DATA, 0));
+                        if (!IsRepeatedRecord(e.DATA))
+                        {
+                            ReceivedRecord?.Invoke(this, new Record(e.DATA, 0));
+                        }
                         break;
                     default:
                         ReceivedPacket?.Invoke(this, e);
@@ -51,6 +55,25 @@ namespace Anviz.SDK
                 Disconnected?.Invoke(this, EventArgs.Empty);
             };
         }
+
+        /// <summary>
+        /// A W2PRO sends every record in real time twice, 400 to 600 ms apart, also to CrossChex,
+        /// which never answers it. A record has the second of the verification, so the same bytes
+        /// within the window are the same record. Called by the receiver thread only
+        /// </summary>
+        private bool IsRepeatedRecord(byte[] data)
+        {
+            var now = DateTime.UtcNow;
+            var repeated = lastRecord != null && now - lastRecordAt < REPEATED_RECORD_WINDOW
+                && lastRecord.SequenceEqual(data);
+            lastRecord = data;
+            lastRecordAt = now;
+            return repeated;
+        }
+
+        private static readonly TimeSpan REPEATED_RECORD_WINDOW = TimeSpan.FromSeconds(2);
+        private byte[] lastRecord;
+        private DateTime lastRecordAt;
 
         public void Dispose()
         {

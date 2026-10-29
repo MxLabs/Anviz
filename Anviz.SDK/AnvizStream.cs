@@ -155,6 +155,8 @@ namespace Anviz.SDK
                         {
                             DeviceSocket.Close();
                         }
+                        // Connected is false as soon as the command fails, not when the receiver notices
+                        Volatile.Write(ref Closed, true);
                         throw new Exception("Device timeout waiting response.");
                     }
                     timeout.Cancel();

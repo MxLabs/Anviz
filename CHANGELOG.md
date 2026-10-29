@@ -32,6 +32,12 @@ BUG FIXES:
 * The pong to the device ping could be written in the middle of a command
 * Packets split by TCP in more reads, or bigger than 16000 bytes, closed the connection
 * Strings end at their first zero: devices leave bytes of an older value after it (a serial number read as `QWSERF2354234\0m`)
+* `SetTimeZoneInfo` did not send Sunday: the device read it from whatever followed (a Sunday of `1.19:27`)
+* `AnvizDevice.Connected` is false as soon as a command times out; it stayed true until the receiver noticed the closed connection, so the next command failed with "Device is not connected."
+* The W2PRO is a fingerprint device (`BiometricType.Finger`)
+* `AnvizDiscovery.SetNetwork` takes the answer of the device it sets (`UdpNetworkSetting.AnsweredFrom`, the address it answered the search from): every device that receives a broadcast setting answers it, failing when the MAC is not its own, and the first answer was taken
+* `ReceivedRecord` is raised once for a record a W2PRO sends twice in real time, 400 to 600 ms apart (it does so with CrossChex too, which never answers it): the same bytes within 2 seconds are skipped
+* `AnvizDiscovery` throws `InvalidOperationException` telling that UDP port 5060 is taken by another program, such as CrossChex, instead of a `SocketException`
 
 ## v2.0.18
 FEATURES:

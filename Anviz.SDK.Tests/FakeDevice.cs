@@ -121,11 +121,12 @@ namespace Anviz.SDK.Tests
         public Task WaitConnected() => connected.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
         /// <summary>
-        /// Sends a packet the device starts by itself, like the ping (0x7F)
+        /// Sends a packet the device starts by itself, like the ping (0x7F), or the record in real
+        /// time (0xDF), which has a RET
         /// </summary>
-        public async Task Send(byte ack, byte[] data)
+        public async Task Send(byte ack, byte[] data, ResponseStatus? status = null)
         {
-            await Write(Packet(ack, null, data));
+            await Write(Packet(ack, status, data));
         }
 
         /// <summary>

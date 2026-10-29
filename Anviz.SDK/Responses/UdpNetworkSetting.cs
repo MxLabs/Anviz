@@ -26,6 +26,14 @@ namespace Anviz.SDK.Responses
         /// </summary>
         public IPAddress Dns { get; set; }
         public string Url { get; set; }
+        /// <summary>
+        /// The address the device answered the search from. The answer to a setting has no MAC
+        /// address and every device that receives the setting answers it, failing when the MAC
+        /// is not its own: SetNetwork takes the answer from this address, which is the one the
+        /// device had before the setting. Null takes the first device that took the setting,
+        /// for devices that share an address.
+        /// </summary>
+        public IPAddress AnsweredFrom { get; set; }
 
         /// <summary>
         /// The setting of a device as a search found it, to change what is wanted
@@ -43,7 +51,8 @@ namespace Anviz.SDK.Responses
                 Mode = device.Mode,
                 DeviceId = device.DeviceId,
                 Dns = device.Dns,
-                Url = device.Url
+                Url = device.Url,
+                AnsweredFrom = device.AnsweredFrom
             };
         }
 
